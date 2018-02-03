@@ -1,5 +1,5 @@
 import path from 'path';
-import replace from 'rollup-plugin-replace';
+import alias from 'rollup-plugin-alias';
 import babel from 'rollup-plugin-babel';
 
 function resolve(dir) {
@@ -62,13 +62,19 @@ function getConfig() {
       'moment',
       'node-rsa',
       'sha.js',
+      'url',
     ],
   };
 
   const option = builds[process.env.TARGET];
 
   const isBrowser = process.env.TARGET.includes('web');
-  config.plugins.push(replace({'process.browser': isBrowser}));
+  const buildType = isBrowser ? 'browser' : 'node';
+
+  config.plugins.push(alias({
+    '@': resolve('src'),
+    '$common': resolve(`src/${buildType}`),
+  }));
   config.plugins = config.plugins.concat(option.plugins);
 
   config.output = [];
