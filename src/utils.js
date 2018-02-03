@@ -1,5 +1,4 @@
 'use strict';
-import {RouterControllerError} from './error';
 import * as ajax from './ajax';
 
 /**
@@ -55,26 +54,6 @@ export function delay(t) {
 }
 
 /**
- *
- * @param {string} url
- * @return {URL}
- */
-export function parseRouterUrl(url) {
-  let parsedUrl = null;
-  try {
-    parsedUrl = new URL(url);
-  } catch (e) {
-    if (e instanceof TypeError) {
-      throw new RouterControllerError(
-        'invalid_router_url', 'Invalid router page url: '+url);
-    } else {
-      throw e;
-    }
-  }
-  return parsedUrl;
-}
-
-/**
  * Sends a request for the router's global config
  * to determine if there is a connection
  * @param {string} [routerUrl='']
@@ -86,3 +65,5 @@ export function ping(routerUrl='') {
     routerUrl: routerUrl,
   });
 }
+
+export * from '$common/utils';
