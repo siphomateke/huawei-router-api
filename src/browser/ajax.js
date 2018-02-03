@@ -8,7 +8,10 @@ import {
 import * as utils from '@/utils';
 import jxon from 'jxon';
 import * as config from '@/config';
-import NodeRSA from 'node-rsa';
+import {
+  processXmlResponse,
+  doRSAEncrypt
+} from '@/common/ajax';
 
 /**
  * @typedef xhrRequestOptions
@@ -68,9 +71,15 @@ export function xhrRequest(options) {
 }
 
 /**
+ * @typedef xhrXmlObj
+ * @property {object} obj
+ * @property {XMLHttpRequest} xhr
+ */
+
+/**
  *
  * @param {xhrRequestOptions} xhrOptions
- * @return {Promise<XMLHttpRequest>}
+ * @return {Promise<xhrXmlObj>}
  */
 export function xhrRequestXml(xhrOptions) {
   xhrOptions = Object.assign({
@@ -78,7 +87,7 @@ export function xhrRequestXml(xhrOptions) {
   }, xhrOptions);
   return xhrRequest(xhrOptions).then((xhr) => {
     if (xhr.responseXML instanceof Document) {
-      return xhr;
+      return {obj: xml2object(xhr.responseXML), xhr};
     } else {
       Promise.reject(new XhrError('xhr_invalid_xml',
         'Expected XML to be instance of Document. Got: ' + xhr.responseXML));
@@ -123,20 +132,8 @@ function recursiveXml2Object(xml) {
  */
 export function xml2object(xml) {
   const obj = {};
-  obj.type = xml.documentElement.tagName;
-  obj.data = recursiveXml2Object(xml.documentElement);
+  obj[xml.documentElement.tagName] = recursiveXml2Object(xml.documentElement);
   return obj;
-}
-
-/**
- *
- * @param {Document} xml
- * @param {boolean} responseMustBeOk
- * @return {Promise<any>}
- */
-export function getProcessedXml(xml, responseMustBeOk) {
-  const ret = xml2object(xml);
-  return processXmlResponse(ret, responseMustBeOk);
 }
 
 /**
@@ -147,44 +144,6 @@ export function getProcessedXml(xml, responseMustBeOk) {
 export function parseXmlString(xml) {
   const xmlDocument = new DOMParser().parseFromString(xml, 'application/xml');
   return xml2object(xmlDocument);
-}
-
-/**
- * Checks if an ajax return is valid by checking if the response is 'ok'
- * @private
- * @param   {object}  ret The AJAX return
- * @return {boolean} if the response is ok
- */
-export function isAjaxReturnOk(ret) {
-  return ret.toLowerCase() === 'ok';
-}
-
-/**
- *
- * @param {*} ret
- * @param {boolean} responseMustBeOk
- * @return {Promise<any>}
- */
-export function processXmlResponse(ret, responseMustBeOk=false) {
-  return new Promise((resolve, reject) => {
-    if (ret.type !== 'error') {
-      if (responseMustBeOk) {
-        if (isAjaxReturnOk(ret.data)) {
-          resolve(ret.data);
-        } else {
-          return Promise.reject(new RouterControllerError(
-            'xml_response_not_ok', ret));
-        }
-      } else {
-        resolve(ret.data);
-      }
-    } else {
-      const errorName = getRouterApiErrorName(ret.data.code);
-      let message = errorName ? errorName : ret.data.code;
-      message += ((ret.data.message) ? ' : ' + ret.data.message : '');
-      reject(new RouterApiError(message));
-    }
-  });
 }
 
 /**
@@ -214,8 +173,8 @@ export function getAjaxData(options) {
     return xhrRequestXml({
       url: parsedUrl.origin + '/' + options.url,
       requestHeaders: headers,
-    }).then((xhr) => {
-      return getProcessedXml(xhr.responseXML, options.responseMustBeOk);
+    }).then((ret) => {
+      return processXmlResponse(ret.obj, options.responseMustBeOk);
     });
   });
 }
@@ -293,19 +252,6 @@ export function objectToXml(obj) {
   return '<?xml version="1.0" encoding="UTF-8"?>'+jxon.jsToString(obj);
 }
 
-async function doRSAEncrypt(str) {
-  if (str === '') {
-    return '';
-  }
-  const publicKey = await config.getPublicEncryptionKey();
-  const key = new NodeRSA();
-  key.importKey({
-    n: new Buffer(publicKey.n),
-    e: parseInt(publicKey.e, 16),
-  }, 'components-public');
-  return key.encrypt(str, 'hex');
-}
-
 const ajaxQueue = new utils.Queue();
 
 /**
@@ -350,13 +296,13 @@ export function saveAjaxData(options) {
           updateTokens(tokens);
         }
 
-        const xhr = await xhrRequestXml({
+        const ret = await xhrRequestXml({
           url: config.getParsedUrl().origin + '/' + options.url,
           method: 'POST',
           data: xmlString,
           requestHeaders: headers,
         });
-        return getProcessedXml(xhr.responseXML, options.responseMustBeOk).then((ret) => {
+        return processXmlResponse(ret.obj, options.responseMustBeOk).then((ret) => {
           if (options.url === 'api/user/login' && tokens.length > 0) {
           // login success, empty token list
             tokens = [];
@@ -366,9 +312,9 @@ export function saveAjaxData(options) {
           resolve(ret);
         }).finally(() => {
         // get new tokens
-          const token = xhr.getResponseHeader('__requestverificationtoken');
-          const token1 = xhr.getResponseHeader('__requestverificationtokenone');
-          const token2 = xhr.getResponseHeader('__requestverificationtokentwo');
+          const token = ret.xhr.getResponseHeader('__requestverificationtoken');
+          const token1 = ret.xhr.getResponseHeader('__requestverificationtokenone');
+          const token2 = ret.xhr.getResponseHeader('__requestverificationtokentwo');
           if (token1) {
             tokens.push(token1);
             if (token2) {
