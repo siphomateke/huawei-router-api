@@ -19,7 +19,7 @@ export function isAjaxReturnOk(ret) {
 
 /**
  *
- * @param {*} ret
+ * @param {any} ret
  * @param {boolean} responseMustBeOk
  * @return {Promise<any>}
  */

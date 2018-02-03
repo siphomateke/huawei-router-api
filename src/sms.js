@@ -165,7 +165,7 @@ export async function getSmsCount() {
  * @property {string|number} Phone The phone number from which the SMS was sent
  * @property {string} Content The actual content of the SMS
  * @property {string} Date The date the SMS was received
- * @property {*} Sca
+ * @property {any} Sca
  * @property {number} SaveType
  * @property {number} Priority
  * @property {number} SmsType
