@@ -18,7 +18,7 @@ import xml2js from 'xml2js';
 /**
  *
  * @param {xhrRequestOptions} options
- * @return {Promise<string>}
+ * @return {request.RequestPromise}
  */
 function xhrRequest(options) {
   return request({
