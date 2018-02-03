@@ -73,7 +73,7 @@ function getConfig() {
 
   config.plugins.push(alias({
     '@': resolve('src'),
-    '$common': resolve(`src/${buildType}`),
+    '$env': resolve(`src/${buildType}`),
   }));
   config.plugins = config.plugins.concat(option.plugins);
 
