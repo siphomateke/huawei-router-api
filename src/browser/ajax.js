@@ -71,15 +71,15 @@ export function xhrRequest(options) {
 }
 
 /**
- * @typedef xhrXmlObj
- * @property {object} obj
+ * @typedef xmlRequestResponse
+ * @property {object} data
  * @property {XMLHttpRequest} xhr
  */
 
 /**
  *
  * @param {xhrRequestOptions} xhrOptions
- * @return {Promise<xhrXmlObj>}
+ * @return {Promise<xmlRequestResponse>}
  */
 export function xhrRequestXml(xhrOptions) {
   xhrOptions = Object.assign({
@@ -87,7 +87,7 @@ export function xhrRequestXml(xhrOptions) {
   }, xhrOptions);
   return xhrRequest(xhrOptions).then((xhr) => {
     if (xhr.responseXML instanceof Document) {
-      return {obj: xml2object(xhr.responseXML), xhr};
+      return {data: xml2object(xhr.responseXML), xhr};
     } else {
       Promise.reject(new XhrError('xhr_invalid_xml',
         'Expected XML to be instance of Document. Got: ' + xhr.responseXML));
@@ -174,7 +174,7 @@ export function getAjaxData(options) {
       url: parsedUrl.origin + '/' + options.url,
       requestHeaders: headers,
     }).then((ret) => {
-      return processXmlResponse(ret.obj, options.responseMustBeOk);
+      return processXmlResponse(ret.data, options.responseMustBeOk);
     });
   });
 }
@@ -302,7 +302,7 @@ export function saveAjaxData(options) {
           data: xmlString,
           requestHeaders: headers,
         });
-        return processXmlResponse(ret.obj, options.responseMustBeOk).then((ret) => {
+        return processXmlResponse(ret.data, options.responseMustBeOk).then((ret) => {
           if (options.url === 'api/user/login' && tokens.length > 0) {
           // login success, empty token list
             tokens = [];
