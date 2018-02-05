@@ -67,7 +67,7 @@ function request(options) {
  * @param {xmlRequestOptions} options
  * @return {Promise<any>}
  */
-function xmlRequest(options) {
+export function xmlRequest(options) {
   const requestOptions = {
     url: options.url,
     method: options.method,
