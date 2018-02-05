@@ -31,10 +31,13 @@
   "dependencies": {
     "babel-runtime": "^6.26.0",
     "es6-error": "^4.1.1",
+    "jsdom": "^11.6.2",
     "jxon": "^2.0.0-beta.5",
     "moment": "^2.20.1",
     "node-rsa": "^0.4.2",
-    "sha.js": "^2.4.10"
+    "request": "^2.83.0",
+    "sha.js": "^2.4.10",
+    "xml2js": "^0.4.19"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

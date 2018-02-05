@@ -63,6 +63,9 @@ function getConfig() {
       'node-rsa',
       'sha.js',
       'url',
+      'request',
+      'xml2js',
+      'jsdom'
     ],
   };
 
