@@ -3,6 +3,11 @@
     "target": "es2017",
     "module": "commonjs",
     "checkJs": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "$env/*": ["./src/browser/*"]
+    }
   },
   "include": [
     "src/**/*"
