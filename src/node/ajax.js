@@ -3,7 +3,7 @@ import {
   RequestError,
 } from '@/error';
 import nodeRequest from 'request';
-import xml2js from 'xml2js';
+import jxon from 'jxon';
 import * as config from '@/config';
 import {JSDOM} from 'jsdom';
 
@@ -82,13 +82,12 @@ export function xmlRequest(options) {
   };
   return new Promise((resolve, reject) => {
     request(requestOptions).then(({response, body}) => {
-      xml2js.parseString(body, (err, data) => {
-        if (err) {
-          reject(new RequestError('http_request_invalid_xml', err));
-        } else {
-          resolve({data, headers: response.headers});
-        }
-      });
+      try {
+        const data = jxon.stringToJs(body);
+        resolve({data, headers: response.headers});
+      } catch (e) {
+        reject(new RequestError('http_request_invalid_xml', e));
+      }
     });
   });
 }

@@ -64,7 +64,6 @@ function getConfig() {
       'sha.js',
       'url',
       'request',
-      'xml2js',
       'jsdom',
       'promise.prototype.finally',
     ],
