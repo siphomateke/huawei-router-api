@@ -1,4 +1,4 @@
-import router from 'huawei-router-api/dist/browser.es.js';
+const router = require('huawei-router-api');
 
 router.config.setUrl('http://192.168.1.1');
 router.config.setUsername('username');
