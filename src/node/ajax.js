@@ -26,6 +26,9 @@ import xml2js from 'xml2js';
  * @return {Promise<requestResponse>}
  */
 function request(options) {
+  options = Object.assign({
+    method: 'GET'
+  }, options);
   options.headers = Object.assign({
     'Accept': options.accepts
   }, options.headers);
