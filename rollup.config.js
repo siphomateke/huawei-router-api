@@ -65,7 +65,8 @@ function getConfig() {
       'url',
       'request',
       'xml2js',
-      'jsdom'
+      'jsdom',
+      'promise.prototype.finally',
     ],
   };
 

@@ -1,6 +1,7 @@
 'use strict';
 import * as ajax from './ajax';
 import shajs from 'sha.js';
+import promiseFinally from 'promise.prototype.finally';
 
 /**
  * A promise based queue
@@ -14,7 +15,7 @@ export class Queue {
    * @param {number} idx
    */
   _runItem(idx) {
-    this.list[idx]().finally(() => {
+    promiseFinally(this.list[idx](), () => {
       this._onComplete();
     });
   }

@@ -9,6 +9,7 @@ import {
   isAjaxReturnOk
 } from '@/common/ajax';
 import {xmlRequest, getTokensFromPage} from '$env/ajax';
+import promiseFinally from 'promise.prototype.finally';
 
 /**
  * @typedef GetAjaxDataOptions
@@ -138,7 +139,7 @@ export function saveAjaxData(options) {
           data: xmlString,
           headers,
         });
-        return processXmlResponse(ret.data, options.responseMustBeOk).then((ret) => {
+        return promiseFinally(processXmlResponse(ret.data, options.responseMustBeOk).then((ret) => {
           if (options.url === 'api/user/login' && tokens.length > 0) {
           // login success, empty token list
             tokens = [];
@@ -146,7 +147,7 @@ export function saveAjaxData(options) {
           }
           // TODO: Make sure this works since no value is being returned
           resolve(ret);
-        }).finally(() => {
+        }), () => {
           // get new tokens
           const token = ret.headers['__requestverificationtoken'];
           const token1 = ret.headers['__requestverificationtokenone'];
