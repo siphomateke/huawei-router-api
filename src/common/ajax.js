@@ -6,6 +6,7 @@ import {
 } from '@/error';
 import * as config from '@/config';
 import NodeRSA from 'node-rsa';
+import jxon from 'jxon';
 
 /**
  * Checks if an ajax return is valid by checking if the response is 'ok'
@@ -58,4 +59,13 @@ export async function doRSAEncrypt(str) {
     e: parseInt(publicKey.e, 16),
   }, 'components-public');
   return key.encrypt(str, 'hex');
+}
+
+/**
+ *
+ * @param {object} obj
+ * @return {string}
+ */
+export function objectToXml(obj) {
+  return '<?xml version="1.0" encoding="UTF-8"?>'+jxon.jsToString(obj);
 }

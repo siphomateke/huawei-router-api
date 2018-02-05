@@ -1,191 +1,14 @@
 'use strict';
+import * as utils from '@/utils';
+import * as config from '@/config';
+import {RouterControllerError} from '@/error';
 import {
-  RouterControllerError,
-  RouterApiError,
-  XhrError,
-  getRouterApiErrorName,
-} from './error';
-import * as utils from './utils';
-import jxon from 'jxon';
-import * as config from './config';
-import NodeRSA from 'node-rsa';
-
-/**
- * @typedef xhrRequestOptions
- * @property {string} url
- * @property {string} [mimeType]
- * @property {string} [responseType]
- * @property {string} [method]
- * @property {object} [data]
- * @property {Object.<string, string>} [requestHeaders]
- */
-
-/**
- *
- * @param {xhrRequestOptions} options
- * @return {Promise<XMLHttpRequest>}
- */
-export function xhrRequest(options) {
-  options = Object.assign({
-    mimeType: null,
-    responseType: null,
-    method: 'GET',
-    data: null,
-    requestHeaders: null,
-  }, options);
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open(options.method, options.url, true);
-    if (options.responseType) {
-      xhr.responseType = options.responseType;
-    }
-    if (options.mimeType) {
-      xhr.setRequestHeader('Accept', options.mimeType);
-      xhr.overrideMimeType(options.mimeType);
-    }
-    if (options.requestHeaders) {
-      for (const header in options.requestHeaders) {
-        if (Object.prototype.hasOwnProperty.call(options.requestHeaders, header)) {
-          xhr.setRequestHeader(header, options.requestHeaders[header]);
-        }
-      }
-    }
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 400) {
-        resolve(xhr);
-      } else {
-        reject(new XhrError('xhr_invalid_status', 'XHR status invalid; '+xhr.statusText));
-      }
-    };
-    xhr.ontimeout = () => {
-      reject(new XhrError('xhr_timeout', 'XHR timed out'));
-    };
-    xhr.onerror = (e) => {
-      reject(new XhrError('xhr_error', 'Unknown XHR error.'));
-    };
-    xhr.send(options.data);
-  });
-}
-
-/**
- *
- * @param {xhrRequestOptions} xhrOptions
- * @return {Promise<XMLHttpRequest>}
- */
-export function xhrRequestXml(xhrOptions) {
-  xhrOptions = Object.assign({
-    mimeType: 'application/xml',
-  }, xhrOptions);
-  return xhrRequest(xhrOptions).then((xhr) => {
-    if (xhr.responseXML instanceof Document) {
-      return xhr;
-    } else {
-      Promise.reject(new XhrError('xhr_invalid_xml',
-        'Expected XML to be instance of Document. Got: ' + xhr.responseXML));
-    }
-  });
-}
-
-/**
- *
- * @param {Element} xml
- * @return {object}
- */
-function recursiveXml2Object(xml) {
-  if (xml.children.length > 0) {
-    const obj = {};
-    Array.prototype.forEach.call(xml.children, (el) => {
-      const childObj = (el.children.length > 0) ? recursiveXml2Object(el) : el.textContent;
-      const siblings = Array.prototype.filter.call(el.parentNode.children, function(child) {
-        return child !== el;
-      });
-      // If there is more than one of these elements, then it's an array
-      if (siblings.length > 0 && siblings[0].tagName == el.tagName) {
-        if (!(el.tagName in obj)) {
-          obj[el.tagName] = [];
-        }
-        obj[el.tagName].push(childObj);
-        // Otherwise just store it normally
-      } else {
-        obj[el.tagName] = childObj;
-      }
-    });
-    return obj;
-  } else {
-    return xml.textContent;
-  }
-}
-
-/**
- *
- * @param {Document} xml
- * @return {object}
- */
-export function xml2object(xml) {
-  const obj = {};
-  obj.type = xml.documentElement.tagName;
-  obj.data = recursiveXml2Object(xml.documentElement);
-  return obj;
-}
-
-/**
- *
- * @param {Document} xml
- * @param {boolean} responseMustBeOk
- * @return {Promise<any>}
- */
-export function getProcessedXml(xml, responseMustBeOk) {
-  const ret = xml2object(xml);
-  return processXmlResponse(ret, responseMustBeOk);
-}
-
-/**
- * Converts an xml string to an object
- * @param {string} xml
- * @return {object}
- */
-export function parseXmlString(xml) {
-  const xmlDocument = new DOMParser().parseFromString(xml, 'application/xml');
-  return xml2object(xmlDocument);
-}
-
-/**
- * Checks if an ajax return is valid by checking if the response is 'ok'
- * @private
- * @param   {object}  ret The AJAX return
- * @return {boolean} if the response is ok
- */
-export function isAjaxReturnOk(ret) {
-  return ret.toLowerCase() === 'ok';
-}
-
-/**
- *
- * @param {*} ret
- * @param {boolean} responseMustBeOk
- * @return {Promise<any>}
- */
-export function processXmlResponse(ret, responseMustBeOk=false) {
-  return new Promise((resolve, reject) => {
-    if (ret.type !== 'error') {
-      if (responseMustBeOk) {
-        if (isAjaxReturnOk(ret.data)) {
-          resolve(ret.data);
-        } else {
-          return Promise.reject(new RouterControllerError(
-            'xml_response_not_ok', ret));
-        }
-      } else {
-        resolve(ret.data);
-      }
-    } else {
-      const errorName = getRouterApiErrorName(ret.data.code);
-      let message = errorName ? errorName : ret.data.code;
-      message += ((ret.data.message) ? ' : ' + ret.data.message : '');
-      reject(new RouterApiError(message));
-    }
-  });
-}
+  processXmlResponse,
+  objectToXml,
+  doRSAEncrypt,
+  isAjaxReturnOk
+} from '@/common/ajax';
+import {xmlRequest, getTokensFromPage} from '$env/ajax';
 
 /**
  * @typedef GetAjaxDataOptions
@@ -211,25 +34,12 @@ export function getAjaxData(options) {
     if (tokens.length > 0) {
       headers['__RequestVerificationToken'] = tokens[0];
     }
-    return xhrRequestXml({
+    return xmlRequest({
       url: parsedUrl.origin + '/' + options.url,
-      requestHeaders: headers,
-    }).then((xhr) => {
-      return getProcessedXml(xhr.responseXML, options.responseMustBeOk);
+      headers,
+    }).then((ret) => {
+      return processXmlResponse(ret.data, options.responseMustBeOk);
     });
-  });
-}
-
-/**
- * Gets a page
- * @param {string} url
- * @return {Promise<Document>}
- */
-function getPage(url) {
-  return xhrRequest({
-    url: url, responseType: 'document',
-  }).then((xhr) => {
-    return xhr.response;
   });
 }
 
@@ -241,15 +51,9 @@ export let tokens = null;
  * @return {Promise<string[]>}
  */
 async function getRequestVerificationTokens() {
-  const doc = await getPage(config.getParsedUrl().origin+'/'+'html/home.html');
-  const meta = doc.querySelectorAll('meta[name=csrf_token]');
-  let requestVerificationTokens;
-  if (meta.length > 0) {
-    requestVerificationTokens = [];
-    for (let i=0; i < meta.length; i++) {
-      requestVerificationTokens.push(meta[i].content);
-    }
-    return requestVerificationTokens;
+  const tokens = await getTokensFromPage();
+  if (tokens.length > 0) {
+    return tokens;
   } else {
     const data = await getAjaxData({url: 'api/webserver/token'});
     return [data.token];
@@ -282,28 +86,6 @@ export function getTokens() {
 
 export function updateTokens(newTokens) {
   tokens = newTokens;
-}
-
-/**
- *
- * @param {object} obj
- * @return {string}
- */
-export function objectToXml(obj) {
-  return '<?xml version="1.0" encoding="UTF-8"?>'+jxon.jsToString(obj);
-}
-
-async function doRSAEncrypt(str) {
-  if (str === '') {
-    return '';
-  }
-  const publicKey = await config.getPublicEncryptionKey();
-  const key = new NodeRSA();
-  key.importKey({
-    n: new Buffer(publicKey.n),
-    e: parseInt(publicKey.e, 16),
-  }, 'components-public');
-  return key.encrypt(str, 'hex');
 }
 
 const ajaxQueue = new utils.Queue();
@@ -350,13 +132,13 @@ export function saveAjaxData(options) {
           updateTokens(tokens);
         }
 
-        const xhr = await xhrRequestXml({
+        const ret = await xmlRequest({
           url: config.getParsedUrl().origin + '/' + options.url,
           method: 'POST',
           data: xmlString,
-          requestHeaders: headers,
+          headers,
         });
-        return getProcessedXml(xhr.responseXML, options.responseMustBeOk).then((ret) => {
+        return processXmlResponse(ret.data, options.responseMustBeOk).then((ret) => {
           if (options.url === 'api/user/login' && tokens.length > 0) {
           // login success, empty token list
             tokens = [];
@@ -365,10 +147,10 @@ export function saveAjaxData(options) {
           // TODO: Make sure this works since no value is being returned
           resolve(ret);
         }).finally(() => {
-        // get new tokens
-          const token = xhr.getResponseHeader('__requestverificationtoken');
-          const token1 = xhr.getResponseHeader('__requestverificationtokenone');
-          const token2 = xhr.getResponseHeader('__requestverificationtokentwo');
+          // get new tokens
+          const token = ret.headers['__requestverificationtoken'];
+          const token1 = ret.headers['__requestverificationtokenone'];
+          const token2 = ret.headers['__requestverificationtokentwo'];
           if (token1) {
             tokens.push(token1);
             if (token2) {
@@ -389,3 +171,5 @@ export function saveAjaxData(options) {
     });
   });
 }
+
+export {isAjaxReturnOk};
