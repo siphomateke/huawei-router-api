@@ -2,6 +2,7 @@ import path from 'path';
 import alias from 'rollup-plugin-alias';
 import babel from 'rollup-plugin-babel';
 import pkg from './package.json';
+import sourcemaps from 'rollup-plugin-sourcemaps';
 
 function resolve(dir) {
   return path.join(__dirname, dir);
@@ -67,11 +68,11 @@ external.push(...[
 function getConfig() {
   const config = {
     input: 'src/index.js',
-    plugins: [],
+    plugins: [sourcemaps()],
     external,
   };
 
-  const option = builds[process.env.TARGET];
+  const option = builds[process.env.TARGET.split('-')[1]];
 
   const isBrowser = process.env.TARGET.includes('web');
   const buildType = isBrowser ? 'browser' : 'node';
@@ -87,6 +88,9 @@ function getConfig() {
     const output = {};
     output.file = resolve(`dist/${option.outputFile}.${format}.js`);
     output.format = format;
+    if (process.env.TARGET.includes('dev')) {
+      output.sourcemap = true;
+    }
     config.output.push(output);
   }
   return config;
