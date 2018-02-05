@@ -7,6 +7,8 @@ import xml2js from 'xml2js';
 import * as config from '@/config';
 import {JSDOM} from 'jsdom';
 
+const jar = nodeRequest.jar();
+
 /**
  * @typedef requestOptions
  * @property {string} url
@@ -39,7 +41,8 @@ function request(options) {
       url: options.url,
       method: options.method,
       headers: options.headers,
-      body: options.data
+      body: options.data,
+      jar: jar
     }, (error, response, body) => {
       if (error) {
         reject(error);
