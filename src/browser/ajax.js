@@ -77,8 +77,10 @@ function xhrRequest(options) {
 function parseHeaders(headers) {
   const parsed = {};
   for (let line of headers.split('\n')) {
+    if (line.length > 0) {
     const pair = line.split(':');
     parsed[pair[0]] = pair[1].trim();
+  }
   }
   return parsed;
 }
