@@ -95,7 +95,7 @@ function parseHeaders(headers) {
  * @param {xhrRequestOptions} xhrOptions
  * @return {Promise<xmlRequestResponse>}
  */
-export function xhrRequestXml(xhrOptions) {
+export function xmlRequest(xhrOptions) {
   xhrOptions = Object.assign({
     mimeType: 'application/xml',
   }, xhrOptions);
@@ -187,7 +187,7 @@ export function getAjaxData(options) {
     if (tokens.length > 0) {
       headers['__RequestVerificationToken'] = tokens[0];
     }
-    return xhrRequestXml({
+    return xmlRequest({
       url: parsedUrl.origin + '/' + options.url,
       requestHeaders: headers,
     }).then((ret) => {
@@ -313,7 +313,7 @@ export function saveAjaxData(options) {
           updateTokens(tokens);
         }
 
-        const ret = await xhrRequestXml({
+        const ret = await xmlRequest({
           url: config.getParsedUrl().origin + '/' + options.url,
           method: 'POST',
           data: xmlString,

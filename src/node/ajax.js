@@ -2,11 +2,11 @@
 import {
   XhrError,
 } from '@/error';
-import request from 'request';
+import nodeRequest from 'request';
 import xml2js from 'xml2js';
 
 /**
- * @typedef xhrRequestOptions
+ * @typedef requestOptions
  * @property {string} url
  * @property {string} [mimeType]
  * @property {string} [responseType]
@@ -16,19 +16,19 @@ import xml2js from 'xml2js';
  */
 
 /**
- * @typedef xhrRequestResponse
- * @property {request.RequestResponse} response
+ * @typedef requestResponse
+ * @property {nodeRequest.RequestResponse} response
  * @property {any} body
  */
 
 /**
  *
- * @param {xhrRequestOptions} options
- * @return {Promise<xhrRequestResponse>}
+ * @param {requestOptions} options
+ * @return {Promise<requestResponse>}
  */
-function xhrRequest(options) {
+function request(options) {
   return new Promise((resolve, reject) => {
-    return request({
+    return nodeRequest({
       url: options.url,
       method: options.method,
       headers: options.requestHeaders
@@ -50,15 +50,15 @@ function xhrRequest(options) {
 
 /**
  *
- * @param {xhrRequestOptions} xhrOptions
+ * @param {requestOptions} xhrOptions
  * @return {Promise<any>}
  */
-function xhrRequestXml(xhrOptions) {
+function xmlRequest(xhrOptions) {
   xhrOptions = Object.assign({
     mimeType: 'application/xml',
   }, xhrOptions);
   return new Promise((resolve, reject) => {
-    xhrRequest(xhrOptions).then(({response, body}) => {
+    request(xhrOptions).then(({response, body}) => {
       xml2js.parseString(body, (err, data) => {
         if (err) {
           reject(new XhrError('xhr_invalid_xml', err));
