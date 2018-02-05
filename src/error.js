@@ -10,7 +10,7 @@ class CodeBasedError extends ExtendableError {
 
 export class RouterControllerError extends CodeBasedError {}
 
-export class RouterApiError extends RouterControllerError {}
+export class RouterApiError extends CodeBasedError {}
 
 export class RequestError extends CodeBasedError {}
 
@@ -45,7 +45,6 @@ export const apiErrorCodes = {
   'ussd_timeout',
   'ussd_release_fail',
   'ajax_no_tokens'
-  // TODO: Add error chrome storage error
 ];*/
 
 export function getRouterApiErrorName(code) {
