@@ -1,11 +1,11 @@
 'use strict';
-import * as admin from './admin';
-import * as config from './config';
-import * as sms from './sms';
-import * as ussd from './ussd';
-import * as monitoring from './monitoring';
-import * as utils from './utils';
-import {RouterControllerError, RouterApiError, RequestError} from './error';
+import * as admin from '@/admin';
+import * as config from '@/config';
+import * as sms from '@/sms';
+import * as ussd from '@/ussd';
+import * as monitoring from '@/monitoring';
+import * as utils from '@/utils';
+import {RouterControllerError, RouterApiError, RequestError} from '@/error';
 
 /**
  * Controls access to the router

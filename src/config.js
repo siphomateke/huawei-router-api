@@ -1,6 +1,6 @@
 'use strict';
-import * as ajax from './ajax';
-import * as utils from './utils';
+import * as ajax from '@/ajax';
+import * as utils from '@/utils';
 
 const config = {
   username: null,

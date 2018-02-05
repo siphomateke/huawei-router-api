@@ -1,7 +1,7 @@
 'use strict';
-import {RouterControllerError, RouterApiError} from './error';
-import * as utils from './utils';
-import * as ajax from './ajax';
+import {RouterControllerError, RouterApiError} from '@/error';
+import * as utils from '@/utils';
+import * as ajax from '@/ajax';
 
 /**
  * Get's USSD options from a message string.

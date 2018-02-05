@@ -1,7 +1,7 @@
 'use strict';
-import * as ajax from './ajax';
-import * as config from './config';
-import * as utils from './utils';
+import * as ajax from '@/ajax';
+import * as config from '@/config';
+import * as utils from '@/utils';
 
 /**
  * @typedef StateLogin

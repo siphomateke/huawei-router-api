@@ -1,5 +1,5 @@
 'use strict';
-import * as ajax from './ajax';
+import * as ajax from '@/ajax';
 import shajs from 'sha.js';
 import promiseFinally from 'promise.prototype.finally';
 
