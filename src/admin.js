@@ -14,7 +14,7 @@ import * as utils from './utils';
  * @return {Promise<StateLogin>}
  */
 export function getLoginState() {
-  return ajax.getAjaxData({url: 'api/user/state-login'}).then((data) => {
+  return ajax.getAjaxData({url: 'api/user/state-login'}).then(data => {
     return {
       State: parseInt(data.State),
       Username: data.Username,
@@ -24,7 +24,7 @@ export function getLoginState() {
 }
 
 export function isLoggedIn() {
-  return getLoginState().then((ret) => {
+  return getLoginState().then(ret => {
     if (ret.State === 0) {
       return true;
     } else {

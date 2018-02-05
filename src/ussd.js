@@ -16,7 +16,7 @@ function getOptions(message) {
   const foundOptions = message.match(/(^.|\n.)+\. (.+)/gi);
   const options = {};
   if (foundOptions) {
-    foundOptions.map((element) => {
+    foundOptions.map(element => {
       const regExp = /((^.|\n.)+)\. /;
       const match = regExp.exec(element);
       const key = match[1].replace(/\n/, '');
@@ -43,7 +43,7 @@ export function parse(message) {
  * @return {Promise<boolean>}
  */
 export function releaseUssd() {
-  return ajax.getAjaxData({url: 'api/ussd/release'}).then((ret) => {
+  return ajax.getAjaxData({url: 'api/ussd/release'}).then(ret => {
     if (ajax.isAjaxReturnOk(ret)) {
       return true;
     } else {
@@ -65,12 +65,10 @@ export function releaseUssd() {
 export function getUssdResult() {
   return ajax.getAjaxData({
     url: 'api/ussd/get',
-  }).catch((err) => {
+  }).catch(err => {
     if (err instanceof RouterApiError) {
       if (err.code === 'ERROR_USSD_PROCESSING') {
-        return utils.delay(1000).then(() => {
-          return getUssdResult();
-        });
+        return utils.delay(1000).then(() => getUssdResult());
       } else if (err.code == 'ERROR_USSD_TIMEOUT') {
         releaseUssd();
         return Promise.reject(new RouterControllerError(
@@ -96,7 +94,5 @@ export async function sendUssdCommand(command) {
       timeout: '',
     },
     responseMustBeOk: true,
-  }).then((ret) => {
-    return getUssdResult();
-  });
+  }).then(ret => getUssdResult());
 }

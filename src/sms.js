@@ -43,7 +43,7 @@ function arrayMatch(message, regExpMatch, mapFunc) {
  * @return {SmsDataUsage[]}
  */
 function getDataUsage(message) {
-  return arrayMatch(message, /(\d*)(\.*)(\d*)( *)mb/gi, (element) => {
+  return arrayMatch(message, /(\d*)(\.*)(\d*)( *)mb/gi, element => {
     return {
       amount: parseFloat(element.replace(/( *)mb/i, '')),
       unit: 'MB',
@@ -52,21 +52,19 @@ function getDataUsage(message) {
 }
 function getExpiryDate(message) {
   return arrayMatch(
-    message, /(\d+)-(\d+)-(\d+) (\d{2}):(\d{2}):(\d{2})/g, (date) => {
-      return moment(date);
-    });
+    message, /(\d+)-(\d+)-(\d+) (\d{2}):(\d{2}):(\d{2})/g,
+    date => moment(date));
 }
 function getMoney(message) {
   return arrayMatch(
-    message, /(\d*)(\.*)(\d*)( *)kwacha/gi, (element) => {
-      return parseFloat(element.replace(/( *)kwacha/i, ''));
-    });
+    message, /(\d*)(\.*)(\d*)( *)kwacha/gi,
+    element => parseFloat(element.replace(/( *)kwacha/i, '')));
 }
 
 function getPercent(message) {
-  return arrayMatch(message, /\d+%/gi, (element) => {
-    return parseFloat(element.replace(/%/, ''));
-  });
+  return arrayMatch(
+    message, /\d+%/gi,
+    element => parseFloat(element.replace(/%/, '')));
 }
 
 /**
@@ -406,9 +404,7 @@ export function sendSms(options) {
   return ajax.saveAjaxData({
     url: 'api/sms/send-sms',
     request: createSmsRequest(options),
-  }).then(() => {
-    return getSmsSendStatus();
-  });
+  }).then(() => getSmsSendStatus());
 }
 
 /**
@@ -417,7 +413,7 @@ export function sendSms(options) {
  * @return {Promise<any>}
  */
 export function deleteSms(indices) {
-  const request = indices.map((i) => {
+  const request = indices.map(i => {
     return {Index: i};
   });
   return ajax.saveAjaxData({

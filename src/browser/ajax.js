@@ -60,7 +60,7 @@ function xhrRequest(options) {
     xhr.ontimeout = () => {
       reject(new RequestError('http_request_timeout', 'XHR timed out'));
     };
-    xhr.onerror = (e) => {
+    xhr.onerror = e => {
       reject(new RequestError('http_request_error','Unknown HTTP request error; '+e));
     };
     xhr.send(options.data);
@@ -115,7 +115,7 @@ export function xmlRequest(options) {
     }
   }
   if ('headers' in options) requestOptions.requestHeaders = options.headers;
-  return xhrRequest(requestOptions).then((xhr) => {
+  return xhrRequest(requestOptions).then(xhr => {
     if (xhr.responseXML instanceof Document) {
       return {
         data: jxon.xmlToJs(xhr.responseXML),
@@ -136,9 +136,7 @@ export function xmlRequest(options) {
 function getPage(url) {
   return xhrRequest({
     url: url, responseType: 'document',
-  }).then((xhr) => {
-    return xhr.response;
-  });
+  }).then(xhr => xhr.response);
 }
 
 /**

@@ -30,7 +30,7 @@ export function getAjaxData(options) {
   } else {
     parsedUrl = config.getParsedUrl();
   }
-  return getTokens().then((tokens) => {
+  return getTokens().then(tokens => {
     const headers = {};
     if (tokens.length > 0) {
       headers['__RequestVerificationToken'] = tokens[0];
@@ -38,9 +38,7 @@ export function getAjaxData(options) {
     return xmlRequest({
       url: parsedUrl.origin + '/' + options.url,
       headers,
-    }).then((ret) => {
-      return processXmlResponse(ret.data, options.responseMustBeOk);
-    });
+    }).then(ret => processXmlResponse(ret.data, options.responseMustBeOk));
   });
 }
 
@@ -78,7 +76,7 @@ export function getTokens() {
     } else {
       return refreshTokens().then(() => {
         resolve(tokens);
-      }).catch((e) => {
+      }).catch(e => {
         reject(e);
       });
     }
@@ -139,7 +137,7 @@ export function saveAjaxData(options) {
           data: xmlString,
           headers,
         });
-        return promiseFinally(processXmlResponse(ret.data, options.responseMustBeOk).then((ret) => {
+        return promiseFinally(processXmlResponse(ret.data, options.responseMustBeOk).then(ret => {
           if (options.url === 'api/user/login' && tokens.length > 0) {
           // login success, empty token list
             tokens = [];
