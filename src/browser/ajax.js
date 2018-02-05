@@ -11,6 +11,7 @@ import {
   processXmlResponse,
   doRSAEncrypt
 } from '@/common/ajax';
+import jxon from 'jxon';
 
 /**
  * @typedef xhrRequestOptions
@@ -120,7 +121,7 @@ export function xmlRequest(options) {
   return xhrRequest(requestOptions).then((xhr) => {
     if (xhr.responseXML instanceof Document) {
       return {
-        data: xml2object(xhr.responseXML),
+        data: jxon.xmlToJs(xhr.responseXML),
         headers: parseHeaders(xhr.getAllResponseHeaders())
       };
     } else {
@@ -128,47 +129,6 @@ export function xmlRequest(options) {
         'Expected XML to be instance of Document. Response: ' + xhr.responseXML));
     }
   });
-}
-
-/**
- *
- * @param {Element} xml
- * @return {object}
- */
-function recursiveXml2Object(xml) {
-  if (xml.children.length > 0) {
-    const obj = {};
-    Array.prototype.forEach.call(xml.children, (el) => {
-      const childObj = (el.children.length > 0) ? recursiveXml2Object(el) : el.textContent;
-      const siblings = Array.prototype.filter.call(el.parentNode.children, function(child) {
-        return child !== el;
-      });
-      // If there is more than one of these elements, then it's an array
-      if (siblings.length > 0 && siblings[0].tagName == el.tagName) {
-        if (!(el.tagName in obj)) {
-          obj[el.tagName] = [];
-        }
-        obj[el.tagName].push(childObj);
-        // Otherwise just store it normally
-      } else {
-        obj[el.tagName] = childObj;
-      }
-    });
-    return obj;
-  } else {
-    return xml.textContent;
-  }
-}
-
-/**
- *
- * @param {Document} xml
- * @return {object}
- */
-function xml2object(xml) {
-  const obj = {};
-  obj[xml.documentElement.tagName] = recursiveXml2Object(xml.documentElement);
-  return obj;
 }
 
 /**
