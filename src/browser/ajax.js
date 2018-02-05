@@ -85,6 +85,14 @@ function parseHeaders(headers) {
 }
 
 /**
+ * @typedef xmlRequestOptions
+ * @property {string} url
+ * @property {string} [method]
+ * @property {object} [data]
+ * @property {Object.<string, string>} [headers]
+ */
+
+/**
  * @typedef xmlRequestResponse
  * @property {object} data
  * @property {Object.<string, string>} headers
@@ -92,14 +100,18 @@ function parseHeaders(headers) {
 
 /**
  *
- * @param {xhrRequestOptions} xhrOptions
+ * @param {xmlRequestOptions} options
  * @return {Promise<xmlRequestResponse>}
  */
-export function xmlRequest(xhrOptions) {
-  xhrOptions = Object.assign({
-    mimeType: 'application/xml',
-  }, xhrOptions);
-  return xhrRequest(xhrOptions).then((xhr) => {
+export function xmlRequest(options) {
+  const requestOptions = {
+    url: options.url,
+    method: options.method,
+    data: options.data,
+    requestHeaders: options.headers,
+    mimeType: 'application/xml'
+  };
+  return xhrRequest(requestOptions).then((xhr) => {
     if (xhr.responseXML instanceof Document) {
       return {
         data: xml2object(xhr.responseXML),
@@ -189,7 +201,7 @@ export function getAjaxData(options) {
     }
     return xmlRequest({
       url: parsedUrl.origin + '/' + options.url,
-      requestHeaders: headers,
+      headers,
     }).then((ret) => {
       return processXmlResponse(ret.data, options.responseMustBeOk);
     });
@@ -317,7 +329,7 @@ export function saveAjaxData(options) {
           url: config.getParsedUrl().origin + '/' + options.url,
           method: 'POST',
           data: xmlString,
-          requestHeaders: headers,
+          headers,
         });
         return processXmlResponse(ret.data, options.responseMustBeOk).then((ret) => {
           if (options.url === 'api/user/login' && tokens.length > 0) {
