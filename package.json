@@ -7,7 +7,7 @@
   "scripts": {
     "dev:web": "cross-env TARGET=dev-web rollup -w -c ./rollup.config.js",
     "dev:node": "cross-env TARGET=dev-node rollup -w -c ./rollup.config.js",
-    "dev": "npm run dev:node",
+    "dev": "concurrently --kill-others \"npm run dev:node\" \"npm run dev:web\"",
     "build:web": "cross-env TARGET=prod-web rollup -c ./rollup.config.js",
     "build:node": "cross-env TARGET=prod-node rollup -c ./rollup.config.js",
     "build": "npm run build:web && npm run build:node"
@@ -44,6 +44,7 @@
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.1",
+    "concurrently": "^3.5.1",
     "cross-env": "^5.1.3",
     "rollup": "^0.55.1",
     "rollup-plugin-alias": "^1.4.0",
