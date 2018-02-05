@@ -1,6 +1,7 @@
 import path from 'path';
 import alias from 'rollup-plugin-alias';
 import babel from 'rollup-plugin-babel';
+import pkg from './package.json';
 
 function resolve(dir) {
   return path.join(__dirname, dir);
@@ -52,21 +53,22 @@ const builds = {
   },
 };
 
+const external = Object.keys(pkg.dependencies);
+external.push(...[
+  'url',
+  'babel-runtime/regenerator',
+  'babel-runtime/helpers/asyncToGenerator',
+  'babel-runtime/helpers/classCallCheck',
+  'babel-runtime/helpers/createClass',
+  'babel-runtime/helpers/possibleConstructorReturn',
+  'babel-runtime/helpers/inherits',
+]);
+
 function getConfig() {
   const config = {
     input: 'src/index.js',
     plugins: [],
-    external: [
-      'es6-error',
-      'jxon',
-      'moment',
-      'node-rsa',
-      'sha.js',
-      'url',
-      'request',
-      'jsdom',
-      'promise.prototype.finally',
-    ],
+    external,
   };
 
   const option = builds[process.env.TARGET];
@@ -74,11 +76,11 @@ function getConfig() {
   const isBrowser = process.env.TARGET.includes('web');
   const buildType = isBrowser ? 'browser' : 'node';
 
+  config.plugins = config.plugins.concat(option.plugins);
   config.plugins.push(alias({
     '@': resolve('src'),
     '$env': resolve(`src/${buildType}`),
   }));
-  config.plugins = config.plugins.concat(option.plugins);
 
   config.output = [];
   for (let format of formats) {
