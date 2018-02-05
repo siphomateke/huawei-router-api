@@ -1,6 +1,6 @@
 'use strict';
 import {
-  XhrError,
+  RequestError,
 } from '@/error';
 import nodeRequest from 'request';
 import xml2js from 'xml2js';
@@ -42,10 +42,10 @@ function request(options) {
         if (response.statusCode >= 200 && response.statusCode < 400) {
           resolve({response, body});
         } else {
-          reject(new XhrError('xhr_invalid_status', 'XHR status invalid; '+response.statusMessage));
+          reject(new RequestError('http_request_invalid_status', 'HTTP request response status invalid; '+response.statusMessage));
         }
       } else {
-        reject(new XhrError('xhr_error','Unknown XHR error; '));
+        reject(new RequestError('http_request_error','Unknown HTTP request error.'));
       }
     });
   });
@@ -76,7 +76,7 @@ function xmlRequest(options) {
     request(requestOptions).then(({response, body}) => {
       xml2js.parseString(body, (err, data) => {
         if (err) {
-          reject(new XhrError('xhr_invalid_xml', err));
+          reject(new RequestError('http_request_invalid_xml', err));
         } else {
           resolve({data, headers: response.headers});
         }

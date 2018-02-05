@@ -5,7 +5,7 @@ import * as sms from './sms';
 import * as ussd from './ussd';
 import * as monitoring from './monitoring';
 import * as utils from './utils';
-import {RouterControllerError, RouterApiError, XhrError} from './error';
+import {RouterControllerError, RouterApiError, RequestError} from './error';
 
 /**
  * Controls access to the router
@@ -45,5 +45,5 @@ export default {
   },
   RouterControllerError,
   RouterApiError,
-  XhrError,
+  RequestError,
 };

@@ -1,21 +1,18 @@
 'use strict';
 import ExtendableError from 'es6-error';
 
-export class RouterControllerError extends ExtendableError {
+class CodeBasedError extends ExtendableError {
   constructor(code, message) {
     super(typeof message !== 'undefined' ? message : code);
     this.code = code;
   }
 }
+
+export class RouterControllerError extends CodeBasedError {}
 
 export class RouterApiError extends RouterControllerError {}
 
-export class XhrError extends ExtendableError {
-  constructor(code, message) {
-    super(typeof message !== 'undefined' ? message : code);
-    this.code = code;
-  }
-}
+export class RequestError extends CodeBasedError {}
 
 export const apiErrorCodes = {
   100002: 'ERROR_SYSTEM_NO_SUPPORT',
@@ -37,14 +34,14 @@ export const apiErrorCodes = {
 };
 
 /* const errors = [
-  'xhr_error',
-  'xhr_invalid_xml',
-  'xhr_invalid_status',
+  'http_request_error',
+  'http_request_invalid_xml',
+  'http_request_invalid_status',
   'xml_type_invalid',
   'xml_response_not_ok',
   'router_url_not_set',
   'invalid_router_url',
-  'xhr_timeout',
+  'http_request_timeout',
   'ussd_timeout',
   'ussd_release_fail',
   'ajax_no_tokens'

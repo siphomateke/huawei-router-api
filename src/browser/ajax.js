@@ -2,7 +2,7 @@
 import {
   RouterControllerError,
   RouterApiError,
-  XhrError,
+  RequestError,
   getRouterApiErrorName,
 } from '@/error';
 import * as utils from '@/utils';
@@ -57,14 +57,14 @@ export function xhrRequest(options) {
       if (xhr.status >= 200 && xhr.status < 400) {
         resolve(xhr);
       } else {
-        reject(new XhrError('xhr_invalid_status', 'XHR status invalid; '+xhr.statusText));
+        reject(new RequestError('http_request_invalid_status', 'HTTP request response status invalid; '+xhr.statusText));
       }
     };
     xhr.ontimeout = () => {
-      reject(new XhrError('xhr_timeout', 'XHR timed out'));
+      reject(new RequestError('http_request_timeout', 'XHR timed out'));
     };
     xhr.onerror = (e) => {
-      reject(new XhrError('xhr_error', 'Unknown XHR error.'));
+      reject(new RequestError('http_request_error','Unknown HTTP request error; '+e));
     };
     xhr.send(options.data);
   });
@@ -106,8 +106,8 @@ export function xmlRequest(xhrOptions) {
         headers: parseHeaders(xhr.getAllResponseHeaders())
       };
     } else {
-      Promise.reject(new XhrError('xhr_invalid_xml',
-        'Expected XML to be instance of Document. Got: ' + xhr.responseXML));
+      Promise.reject(new RequestError('http_request_invalid_xml',
+        'Expected XML to be instance of Document. Response: ' + xhr.responseXML));
     }
   });
 }
