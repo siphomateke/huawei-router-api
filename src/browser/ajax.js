@@ -71,9 +71,23 @@ export function xhrRequest(options) {
 }
 
 /**
+ * Parses a raw header string into an object
+ * @param {string} headers
+ * @return {object}
+ */
+function parseHeaders(headers) {
+  const parsed = {};
+  for (let line of headers.split('\n')) {
+    const pair = line.split(': ');
+    parsed[pair[0]] = pair[1];
+  }
+  return parsed;
+}
+
+/**
  * @typedef xmlRequestResponse
  * @property {object} data
- * @property {XMLHttpRequest} xhr
+ * @property {Object.<string, string>} headers
  */
 
 /**
@@ -87,7 +101,10 @@ export function xhrRequestXml(xhrOptions) {
   }, xhrOptions);
   return xhrRequest(xhrOptions).then((xhr) => {
     if (xhr.responseXML instanceof Document) {
-      return {data: xml2object(xhr.responseXML), xhr};
+      return {
+        data: xml2object(xhr.responseXML),
+        headers: parseHeaders(xhr.getAllResponseHeaders())
+      };
     } else {
       Promise.reject(new XhrError('xhr_invalid_xml',
         'Expected XML to be instance of Document. Got: ' + xhr.responseXML));
@@ -312,9 +329,9 @@ export function saveAjaxData(options) {
           resolve(ret);
         }).finally(() => {
         // get new tokens
-          const token = ret.xhr.getResponseHeader('__requestverificationtoken');
-          const token1 = ret.xhr.getResponseHeader('__requestverificationtokenone');
-          const token2 = ret.xhr.getResponseHeader('__requestverificationtokentwo');
+          const token = ret.headers['__requestverificationtoken'];
+          const token1 = ret.headers['__requestverificationtokenone'];
+          const token2 = ret.headers['__requestverificationtokentwo'];
           if (token1) {
             tokens.push(token1);
             if (token2) {
