@@ -1,7 +1,7 @@
 'use strict';
 import * as ajax from './ajax';
 import * as config from './config';
-import shajs from 'sha.js';
+import * as utils from './utils';
 
 /**
  * @typedef StateLogin
@@ -33,20 +33,16 @@ export function isLoggedIn() {
   });
 }
 
-function sha256(str) {
-  return shajs('sha256').update(str).digest('hex');
-}
-
 export async function login() {
   const loginState = await getLoginState();
   const loginDetails = config.getLoginDetails();
   const tokens = await ajax.getTokens();
   let processedPassword;
   if (tokens.length > 0 && loginState.password_type === 4) {
-    processedPassword = btoa(sha256(loginDetails.username +
-        btoa(sha256(loginDetails.password)) + tokens[0]));
+    processedPassword = utils.base64encode(utils.sha256(loginDetails.username +
+        utils.base64encode(utils.sha256(loginDetails.password)) + tokens[0]));
   } else {
-    processedPassword = btoa(loginDetails.password);
+    processedPassword = utils.base64encode(loginDetails.password);
   }
   return ajax.saveAjaxData({
     url: 'api/user/login',

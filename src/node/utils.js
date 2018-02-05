@@ -21,3 +21,12 @@ export function parseRouterUrl(url) {
   }
   return parsedUrl;
 }
+
+/**
+ *
+ * @param {string} str
+ * @return {string}
+ */
+export function base64encode(str) {
+  return Buffer.from(str, 'binary').toString('base64');
+}

@@ -1,5 +1,6 @@
 'use strict';
 import * as ajax from './ajax';
+import shajs from 'sha.js';
 
 /**
  * A promise based queue
@@ -64,6 +65,10 @@ export function ping(routerUrl='') {
     url: 'config/global/config.xml',
     routerUrl: routerUrl,
   });
+}
+
+export function sha256(str) {
+  return shajs('sha256').update(str).digest('hex');
 }
 
 export * from '$env/utils';
