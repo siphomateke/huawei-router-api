@@ -52,16 +52,28 @@ function request(options) {
 }
 
 /**
+ * @typedef xmlRequestOptions
+ * @property {string} url
+ * @property {string} [method]
+ * @property {object} [data]
+ * @property {Object.<string, string>} [headers]
+ */
+
+/**
  *
- * @param {requestOptions} options
+ * @param {xmlRequestOptions} options
  * @return {Promise<any>}
  */
 function xmlRequest(options) {
-  options = Object.assign({
-    accepts: 'application/xml',
-  }, options);
+  const requestOptions = {
+    url: options.url,
+    method: options.method,
+    data: options.data,
+    headers: options.headers,
+    accepts: 'application/xml'
+  };
   return new Promise((resolve, reject) => {
-    request(options).then(({response, body}) => {
+    request(requestOptions).then(({response, body}) => {
       xml2js.parseString(body, (err, data) => {
         if (err) {
           reject(new XhrError('xhr_invalid_xml', err));
