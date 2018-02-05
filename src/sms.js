@@ -226,7 +226,7 @@ export async function getSmsList(options) {
 function filterSmsList(options, list) {
   const filteredList = [];
   for (const message of list) {
-    if (options.minDate) {
+    if (options && options.minDate) {
       if (Date.parse(message.Date) > options.minDate) {
         filteredList.push(message);
       }
@@ -269,7 +269,7 @@ async function getFullSmsListRecursive(
   // If a minimum date is given and the order is descending
   // then we can be efficient and stop queries once the date is
   // larger than the minimum date
-  if (options.filter.minDate && smsListOptions.sortOrder === 'desc') {
+  if (options.filter && options.filter.minDate && smsListOptions.sortOrder === 'desc') {
     const dateFilteredList = filterSmsList({minDate: options.filter.minDate}, currentList);
     // If the date filtered list does not match the list then
     // this is the last page we should check as anything later
