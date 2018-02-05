@@ -78,12 +78,15 @@ function parseHeaders(headers) {
   const parsed = {};
   for (let line of headers.split('\n')) {
     if (line.length > 0) {
-    const pair = line.split(':');
-    parsed[pair[0]] = pair[1].trim();
-  }
+      const pair = line.split(':');
+      parsed[pair[0]] = pair[1].trim();
+    }
   }
   return parsed;
 }
+
+// TODO: Find a better way to manage default arguments
+const xmlRequestOptionsKeys = ['url', 'method', 'data'];
 
 /**
  * @typedef xmlRequestOptions
@@ -106,12 +109,14 @@ function parseHeaders(headers) {
  */
 export function xmlRequest(options) {
   const requestOptions = {
-    url: options.url,
-    method: options.method,
-    data: options.data,
-    requestHeaders: options.headers,
     mimeType: 'application/xml'
   };
+  for (let key of xmlRequestOptionsKeys) {
+    if (key in options) {
+      requestOptions[key] = options[key];
+    }
+  }
+  if ('headers' in options) requestOptions.requestHeaders = options.headers;
   return xhrRequest(requestOptions).then((xhr) => {
     if (xhr.responseXML instanceof Document) {
       return {
