@@ -4,6 +4,8 @@ import {
 } from '@/error';
 import nodeRequest from 'request';
 import xml2js from 'xml2js';
+import * as config from '@/config';
+import {JSDOM} from 'jsdom';
 
 /**
  * @typedef requestOptions
@@ -86,4 +88,21 @@ export function xmlRequest(options) {
       });
     });
   });
+}
+
+/**
+ * Gets verification tokens required for making admin requests and logging in
+ * @return {Promise<string[]>}
+ */
+export async function getTokensFromPage() {
+  const {body} = await request({
+    url: config.getParsedUrl().origin+'/'+'html/home.html'
+  });
+  const doc = (new JSDOM(body)).window.document;
+  const meta = doc.querySelectorAll('meta[name=csrf_token]');
+  let requestVerificationTokens = [];
+  for (let i=0; i < meta.length; i++) {
+    requestVerificationTokens.push(meta[i].content);
+  }
+  return requestVerificationTokens;
 }
