@@ -1,5 +1,5 @@
 'use strict';
-import {RouterControllerError, RouterApiError} from '@/error';
+import {RouterError, RouterApiError} from '@/error';
 import * as utils from '@/utils';
 import * as ajax from '@/ajax';
 
@@ -47,7 +47,7 @@ export function releaseUssd() {
     if (ajax.isAjaxReturnOk(ret)) {
       return true;
     } else {
-      return Promise.reject(new RouterControllerError(
+      return Promise.reject(new RouterError(
         'ussd_release_fail'));
     }
   });
@@ -71,7 +71,7 @@ export function getUssdResult() {
         return utils.delay(1000).then(() => getUssdResult());
       } else if (err.code == 'ERROR_USSD_TIMEOUT') {
         releaseUssd();
-        return Promise.reject(new RouterControllerError(
+        return Promise.reject(new RouterError(
           'ussd_timeout'));
       }
     } else {

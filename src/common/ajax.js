@@ -1,6 +1,6 @@
 'use strict';
 import {
-  RouterControllerError,
+  RouterError,
   RouterApiError,
   getRouterApiErrorName,
 } from '@/error';
@@ -33,7 +33,7 @@ export function processXmlResponse(ret, responseMustBeOk=false) {
         if (isAjaxReturnOk(rootValue)) {
           resolve(rootValue);
         } else {
-          return Promise.reject(new RouterControllerError(
+          return Promise.reject(new RouterError(
             'xml_response_not_ok', ret));
         }
       } else {
@@ -41,9 +41,10 @@ export function processXmlResponse(ret, responseMustBeOk=false) {
       }
     } else {
       const errorName = getRouterApiErrorName(rootValue.code);
-      let message = errorName ? errorName : rootValue.code;
-      message += ((rootValue.message) ? ' : ' + rootValue.message : '');
-      reject(new RouterApiError(message));
+      let code = errorName ? errorName.toLowerCase() : rootValue.code
+      let message = code;
+      if (rootValue.message) message += ' : ' + rootValue.message;
+      reject(new RouterApiError(code, message));
     }
   });
 }

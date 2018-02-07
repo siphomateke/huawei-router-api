@@ -54,14 +54,14 @@ function xhrRequest(options) {
       if (xhr.status >= 200 && xhr.status < 400) {
         resolve(xhr);
       } else {
-        reject(new RequestError('http_request_invalid_status', 'HTTP request response status invalid; '+xhr.statusText));
+        reject(new RequestError('invalid_status', 'HTTP request response status invalid; '+xhr.statusText));
       }
     };
     xhr.ontimeout = () => {
-      reject(new RequestError('http_request_timeout', 'XHR timed out'));
+      reject(new RequestError('timeout', 'XHR timed out'));
     };
     xhr.onerror = e => {
-      reject(new RequestError('http_request_error','Unknown HTTP request error; '+e));
+      reject(new RequestError('error','Unknown HTTP request error; '+e));
     };
     xhr.send(options.data);
   });
@@ -127,7 +127,7 @@ export function xmlRequest(options) {
         headers: parseHeaders(xhr.getAllResponseHeaders())
       };
     } else {
-      Promise.reject(new RequestError('http_request_invalid_xml',
+      Promise.reject(new RequestError('invalid_xml',
         'Expected XML to be instance of Document. Response: ' + xhr.responseXML));
     }
   });

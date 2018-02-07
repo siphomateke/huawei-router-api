@@ -1,7 +1,7 @@
 'use strict';
 import * as utils from '@/utils';
 import * as config from '@/config';
-import {RouterControllerError} from '@/error';
+import {RouterError} from '@/error';
 import {
   processXmlResponse,
   objectToXml,
@@ -162,7 +162,7 @@ export function saveAjaxData(options) {
             tokens.push(token);
           } else {
             return Promise.reject(
-              new RouterControllerError(
+              new RouterError(
                 'ajax_no_tokens', 'Can not get response token'));
           }
           updateTokens(tokens);

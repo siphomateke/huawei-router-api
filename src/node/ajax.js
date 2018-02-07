@@ -50,10 +50,10 @@ function request(options) {
         if (response.statusCode >= 200 && response.statusCode < 400) {
           resolve({response, body});
         } else {
-          reject(new RequestError('http_request_invalid_status', 'HTTP request response status invalid; '+response.statusMessage));
+          reject(new RequestError('invalid_status', 'HTTP request response status invalid; '+response.statusMessage));
         }
       } else {
-        reject(new RequestError('http_request_error','Unknown HTTP request error.'));
+        reject(new RequestError('error','Unknown HTTP request error.'));
       }
     });
   });
@@ -91,7 +91,7 @@ export function xmlRequest(options) {
         const data = jxon.stringToJs(body);
         resolve({data, headers: response.headers});
       } catch (e) {
-        reject(new RequestError('http_request_invalid_xml', e));
+        reject(new RequestError('invalid_xml', e));
       }
     });
   });
