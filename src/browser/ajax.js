@@ -60,8 +60,8 @@ function xhrRequest(options) {
     xhr.ontimeout = () => {
       reject(new RequestError('timeout', 'XHR timed out'));
     };
-    xhr.onerror = e => {
-      reject(new RequestError('error','Unknown HTTP request error; '+e));
+    xhr.onerror = () => {
+      reject(new RequestError('error','Unknown HTTP request error.'));
     };
     xhr.send(options.data);
   });
