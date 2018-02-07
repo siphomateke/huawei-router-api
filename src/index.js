@@ -43,7 +43,9 @@ export default {
   utils: {
     ping: utils.ping,
   },
+  errors: {
   RouterError,
   RouterApiError,
   RequestError,
+  },
 };
