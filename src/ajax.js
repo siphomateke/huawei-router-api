@@ -139,16 +139,17 @@ export function saveAjaxData(options) {
           data: xmlString,
           headers,
         });
-        processXmlResponse(ret.data, options.responseMustBeOk).then(ret => {
+        try {
+          const processed = await processXmlResponse(ret.data, options.responseMustBeOk);
           if (options.url === 'api/user/login' && tokens.length > 0) {
           // login success, empty token list
             tokens = [];
             updateTokens(tokens);
           }
-          resolve(ret);
-        }).catch((e) => {
+          resolve(processed);
+        } catch(e) {
           reject(e);
-        }).then(() => {
+        } finally {
           // get new tokens
           const token = ret.headers['__requestverificationtoken'];
           const token1 = ret.headers['__requestverificationtokenone'];
@@ -166,7 +167,7 @@ export function saveAjaxData(options) {
                 'ajax_no_tokens', 'Can not get response token'));
           }
           updateTokens(tokens);
-        });
+        }
       } catch (err) {
         reject(err);
       }
