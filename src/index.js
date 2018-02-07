@@ -5,7 +5,7 @@ import * as sms from '@/sms';
 import * as ussd from '@/ussd';
 import * as monitoring from '@/monitoring';
 import * as utils from '@/utils';
-import {RouterError, RouterApiError, RequestError} from '@/error';
+import {RouterError, RouterApiError, RequestError, isErrorInCategory} from '@/error';
 
 /**
  * Controls access to the router
@@ -44,8 +44,9 @@ export default {
     ping: utils.ping,
   },
   errors: {
-  RouterError,
-  RouterApiError,
-  RequestError,
+    RouterError,
+    RouterApiError,
+    RequestError,
+    isErrorInCategory,
   },
 };

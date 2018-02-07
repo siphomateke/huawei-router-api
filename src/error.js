@@ -39,18 +39,33 @@ export const apiErrorCodes = {
   113053: 'sms_not_enough_space',
 };
 
-/* const errors = [
-  'http_request_error',
-  'http_request_invalid_xml',
-  'http_request_invalid_status',
-  'http_request_timeout',
-  'xml_response_not_ok',
-  'invalid_router_url',
-  'ussd_timeout',
-  'ussd_release_fail',
-  'ajax_no_tokens'
-];*/
+let errorCategories = [
+  'connection',
+  'api',
+  'ussd',
+  'ajax'
+];
+
+const errors = {
+  'http_request_error' : ['connection'],
+  'http_request_invalid_xml': ['connection'],
+  'http_request_invalid_status': ['connection'],
+  'http_request_timeout': ['connection'],
+  'xml_response_not_ok': [],
+  'invalid_router_url': [],
+  'ussd_timeout': ['ussd'],
+  'ussd_release_fail': ['ussd'],
+  'ajax_no_tokens': ['ajax']
+};
+
+for (let error of Object.values(apiErrorCodes)) {
+  errors[error] = ['api'];
+}
 
 export function getRouterApiErrorName(code) {
   return apiErrorCodes[code];
+}
+
+export function isErrorInCategory(errorCode, category) {
+  return errors[errorCode].includes(category);
 }
