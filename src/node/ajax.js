@@ -59,6 +59,11 @@ function request(options) {
   });
 }
 
+export async function basicRequest(url) {
+  const {body} = await request({url});
+  return body;
+}
+
 /**
  * @typedef xmlRequestOptions
  * @property {string} url

@@ -83,6 +83,11 @@ function parseHeaders(headers) {
   return parsed;
 }
 
+export async function basicRequest(url) {
+  const {responseText} = await xhrRequest({url});
+  return responseText;
+}
+
 // TODO: Find a better way to manage default arguments
 const xmlRequestOptionsKeys = ['url', 'method', 'data'];
 

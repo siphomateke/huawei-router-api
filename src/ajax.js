@@ -8,7 +8,11 @@ import {
   doRSAEncrypt,
   isAjaxReturnOk
 } from '@/common/ajax';
-import {xmlRequest, getTokensFromPage} from '$env/ajax';
+import {
+  xmlRequest,
+  getTokensFromPage,
+  basicRequest
+} from '$env/ajax';
 
 /**
  * @typedef GetAjaxDataOptions
@@ -107,7 +111,6 @@ export function saveAjaxData(options) {
   return new Promise((resolve, reject) => {
     ajaxQueue.add(async () => {
       try {
-        // TODO: Make sure this is not replacing the global tokens var
         let tokens = await getTokens();
         // get copy of tokens to work with
         tokens = tokens.slice();
@@ -142,7 +145,6 @@ export function saveAjaxData(options) {
             tokens = [];
             updateTokens(tokens);
           }
-          // TODO: Make sure this works since no value is being returned
           resolve(ret);
         }).catch((e) => {
           reject(e);
@@ -172,4 +174,8 @@ export function saveAjaxData(options) {
   });
 }
 
-export {isAjaxReturnOk};
+export async function ping(url='') {
+  await basicRequest(url);
+}
+
+export {isAjaxReturnOk, xmlRequest};

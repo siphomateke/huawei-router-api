@@ -1,7 +1,9 @@
 'use strict';
 import * as ajax from '@/ajax';
+import * as config from '@/config';
 import shajs from 'sha.js';
 import promiseFinally from 'promise.prototype.finally';
+import * as commonUtils from '$env/utils';
 
 /**
  * A promise based queue
@@ -62,10 +64,13 @@ export function delay(t) {
  * @return {Promise}
  */
 export function ping(routerUrl='') {
-  return ajax.getAjaxData({
-    url: 'config/global/config.xml',
-    routerUrl: routerUrl,
-  });
+  let parsedUrl;
+  if (routerUrl) {
+    parsedUrl = commonUtils.parseRouterUrl(routerUrl);
+  } else {
+    parsedUrl = config.getParsedUrl();
+  }
+  return ajax.ping(parsedUrl.origin);
 }
 
 export function sha256(str) {
