@@ -24,29 +24,27 @@ export function isAjaxReturnOk(ret) {
  * @param {boolean} responseMustBeOk
  * @return {Promise<any>}
  */
-export function processXmlResponse(ret, responseMustBeOk=false) {
-  return new Promise((resolve, reject) => {
-    const root = Object.keys(ret)[0];
-    const rootValue = ret[root];
-    if (root !== 'error') {
-      if (responseMustBeOk) {
-        if (isAjaxReturnOk(rootValue)) {
-          resolve(rootValue);
-        } else {
-          return Promise.reject(new RouterError(
-            'xml_response_not_ok', ret));
-        }
+export async function processXmlResponse(ret, responseMustBeOk=false) {
+  const root = Object.keys(ret)[0];
+  const rootValue = ret[root];
+  if (root !== 'error') {
+    if (responseMustBeOk) {
+      if (isAjaxReturnOk(rootValue)) {
+        return rootValue;
       } else {
-        resolve(rootValue);
+        throw new RouterError(
+          'xml_response_not_ok', ret);
       }
     } else {
-      const errorName = getRouterApiErrorName(rootValue.code);
-      let code = errorName ? errorName.toLowerCase() : rootValue.code
-      let message = code;
-      if (rootValue.message) message += ' : ' + rootValue.message;
-      reject(new RouterApiError(code, message));
+      return rootValue;
     }
-  });
+  } else {
+    const errorName = getRouterApiErrorName(rootValue.code);
+    let code = errorName ? errorName.toLowerCase() : rootValue.code
+    let message = code;
+    if (rootValue.message) message += ' : ' + rootValue.message;
+    throw new RouterApiError(code, message);
+  }
 }
 
 export async function doRSAEncrypt(str) {

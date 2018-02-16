@@ -400,11 +400,12 @@ export function getSmsSendStatus() {
  * @param {SendSmsOptions} options
  * @return {Promise<SmsSendStatus>}
  */
-export function sendSms(options) {
-  return ajax.saveAjaxData({
+export async function sendSms(options) {
+  await ajax.saveAjaxData({
     url: 'api/sms/send-sms',
     request: createSmsRequest(options),
-  }).then(() => getSmsSendStatus());
+  });
+  return getSmsSendStatus();
 }
 
 /**

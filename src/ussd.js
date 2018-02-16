@@ -43,15 +43,14 @@ export function parse(message) {
  * Releases previous USSD result. Must be called after getting a USSD result.
  * @return {Promise<boolean>}
  */
-export function releaseUssd() {
-  return ajax.getAjaxData({url: 'api/ussd/release'}).then(ret => {
-    if (ajax.isAjaxReturnOk(ret)) {
-      return true;
-    } else {
-      return Promise.reject(new RouterError(
-        'ussd_release_fail'));
-    }
-  });
+export async function releaseUssd() {
+  const ret = await ajax.getAjaxData({url: 'api/ussd/release'});
+  if (ajax.isAjaxReturnOk(ret)) {
+    return true;
+  } else {
+    throw new RouterError(
+      'ussd_release_fail');
+  }
 }
 
 export class UssdResultRequest {
@@ -62,30 +61,33 @@ export class UssdResultRequest {
   cancel() {
     this._cancelled = true;
   }
-  _query() {
-    return ajax.getAjaxData({
-      url: 'api/ussd/get',
-    }).catch(err => {
+  async _query() {
+    try {
+      const ret = await ajax.getAjaxData({
+        url: 'api/ussd/get',
+      });
+      return ret;
+    } catch (err) {
       if (err instanceof RouterApiError) {
         if (err.code === 'api_ussd_processing') {
           if (this._elapsedTime >= config.ussdTimeout) {
-            return releaseUssd().then(() => Promise.reject(new RouterError(
-              'ussd_timeout')));
+            await releaseUssd();
+            throw new RouterError('ussd_timeout');
           }
           if (this._cancelled) {
-            return Promise.reject(new RouterError('ussd_cancelled'));
+            throw new RouterError('ussd_cancelled');
           }
-          return utils.delay(config.ussdWaitInterval).then(() => {
-            this._elapsedTime += config.ussdWaitInterval;
-            return this._query()
-          });
+          await utils.delay(config.ussdWaitInterval);
+          this._elapsedTime += config.ussdWaitInterval;
+          return this._query();
         } else if (err.code == 'api_ussd_timeout') {
-          return releaseUssd().then(() => Promise.reject(err));
+          await releaseUssd();
+          throw err;
         }
       } else {
-        return Promise.reject(err);
+        throw err;
       }
-    });
+    }
   }
   /**
    * @typedef UssdResult

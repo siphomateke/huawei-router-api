@@ -13,24 +13,22 @@ import * as utils from '@/utils';
 /**
  * @return {Promise<StateLogin>}
  */
-export function getLoginState() {
-  return ajax.getAjaxData({url: 'api/user/state-login'}).then(data => {
-    return {
-      State: parseInt(data.State),
-      Username: data.Username,
-      password_type: parseInt(data.password_type),
-    };
-  });
+export async function getLoginState() {
+  const data = await ajax.getAjaxData({url: 'api/user/state-login'});
+  return {
+    State: parseInt(data.State),
+    Username: data.Username,
+    password_type: parseInt(data.password_type),
+  };
 }
 
-export function isLoggedIn() {
-  return getLoginState().then(ret => {
-    if (ret.State === 0) {
-      return true;
-    } else {
-      return false;
-    }
-  });
+export async function isLoggedIn() {
+  const ret = await getLoginState();
+  if (ret.State === 0) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 export async function login() {

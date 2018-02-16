@@ -26,23 +26,23 @@ import {
  * @param {GetAjaxDataOptions} options
  * @return {Promise<any>}
  */
-export function getAjaxData(options) {
+export async function getAjaxData(options) {
   let parsedUrl;
   if (options.routerUrl) {
     parsedUrl = utils.parseRouterUrl(options.routerUrl);
   } else {
     parsedUrl = config.getParsedUrl();
   }
-  return getTokens().then(tokens => {
-    const headers = {};
-    if (tokens.length > 0) {
-      headers['__RequestVerificationToken'] = tokens[0];
-    }
-    return xmlRequest({
-      url: parsedUrl.origin + '/' + options.url,
-      headers,
-    }).then(ret => processXmlResponse(ret.data, options.responseMustBeOk));
+  const _tokens = await getTokens();
+  const headers = {};
+  if (_tokens.length > 0) {
+    headers['__RequestVerificationToken'] = _tokens[0];
+  }
+  const ret = await xmlRequest({
+    url: parsedUrl.origin + '/' + options.url,
+    headers,
   });
+  return processXmlResponse(ret.data, options.responseMustBeOk);
 }
 
 // TODO: Improve token storage
@@ -71,19 +71,11 @@ export async function refreshTokens() {
  *
  * @return {Promise<string[]>}
  */
-export function getTokens() {
-  return new Promise((resolve, reject) => {
-    // TODO: Determine why removing resolve breaks this
-    if (tokens) {
-      resolve(tokens);
-    } else {
-      return refreshTokens().then(() => {
-        resolve(tokens);
-      }).catch(e => {
-        reject(e);
-      });
-    }
-  });
+export async function getTokens() {
+  if (!tokens) {
+    await refreshTokens();
+  }
+  return tokens;
 }
 
 export function updateTokens(newTokens) {

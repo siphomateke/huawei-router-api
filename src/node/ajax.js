@@ -77,7 +77,7 @@ export async function basicRequest(url) {
  * @param {xmlRequestOptions} options
  * @return {Promise<any>}
  */
-export function xmlRequest(options) {
+export async function xmlRequest(options) {
   const requestOptions = {
     url: options.url,
     method: options.method,
@@ -85,16 +85,13 @@ export function xmlRequest(options) {
     headers: options.headers,
     accepts: 'application/xml'
   };
-  return new Promise((resolve, reject) => {
-    request(requestOptions).then(({response, body}) => {
-      try {
-        const data = jxon.stringToJs(body);
-        resolve({data, headers: response.headers});
-      } catch (e) {
-        reject(new RequestError('invalid_xml', e));
-      }
-    });
-  });
+  const {response, body} = await request(requestOptions);
+  try {
+    const data = jxon.stringToJs(body);
+    return {data, headers: response.headers};
+  } catch (e) {
+    throw new RequestError('invalid_xml', e);
+  }
 }
 
 /**

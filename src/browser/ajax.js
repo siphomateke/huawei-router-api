@@ -110,7 +110,7 @@ const xmlRequestOptionsKeys = ['url', 'method', 'data'];
  * @param {xmlRequestOptions} options
  * @return {Promise<xmlRequestResponse>}
  */
-export function xmlRequest(options) {
+export async function xmlRequest(options) {
   const requestOptions = {
     mimeType: 'application/xml'
   };
@@ -120,17 +120,16 @@ export function xmlRequest(options) {
     }
   }
   if ('headers' in options) requestOptions.requestHeaders = options.headers;
-  return xhrRequest(requestOptions).then(xhr => {
-    if (xhr.responseXML instanceof Document) {
-      return {
-        data: jxon.xmlToJs(xhr.responseXML),
-        headers: parseHeaders(xhr.getAllResponseHeaders())
-      };
-    } else {
-      Promise.reject(new RequestError('invalid_xml',
-        'Expected XML to be instance of Document. Response: ' + xhr.responseXML));
-    }
-  });
+  const xhr = await xhrRequest(requestOptions);
+  if (xhr.responseXML instanceof Document) {
+    return {
+      data: jxon.xmlToJs(xhr.responseXML),
+      headers: parseHeaders(xhr.getAllResponseHeaders())
+    };
+  } else {
+    throw new RequestError('invalid_xml',
+      'Expected XML to be instance of Document. Response: ' + xhr.responseXML);
+  }
 }
 
 /**
@@ -138,10 +137,11 @@ export function xmlRequest(options) {
  * @param {string} url
  * @return {Promise<Document>}
  */
-function getPage(url) {
-  return xhrRequest({
+async function getPage(url) {
+  const xhr = await xhrRequest({
     url: url, responseType: 'document',
-  }).then(xhr => xhr.response);
+  });
+  return xhr.response;
 }
 
 /**
