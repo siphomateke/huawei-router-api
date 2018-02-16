@@ -95,5 +95,5 @@ export async function sendUssdCommand(command) {
       timeout: '',
     },
     responseMustBeOk: true,
-  }).then(ret => getUssdResult());
+  }).then(() => getUssdResult());
 }
