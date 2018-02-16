@@ -30,6 +30,10 @@
     ],
     "require-jsdoc": [
       "off"
+    ],
+    "arrow-parens": [
+      "error",
+      "as-needed"
     ]
   }
 }

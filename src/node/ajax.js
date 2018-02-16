@@ -31,10 +31,10 @@ const jar = nodeRequest.jar();
  */
 function request(options) {
   options = Object.assign({
-    method: 'GET'
+    method: 'GET',
   }, options);
   options.headers = Object.assign({
-    'Accept': options.accepts
+    'Accept': options.accepts,
   }, options.headers);
   return new Promise((resolve, reject) => {
     return nodeRequest({
@@ -42,7 +42,7 @@ function request(options) {
       method: options.method,
       headers: options.headers,
       body: options.data,
-      jar: jar
+      jar: jar,
     }, (error, response, body) => {
       if (error) {
         reject(error);
@@ -53,7 +53,7 @@ function request(options) {
           reject(new RequestError('invalid_status', 'HTTP request response status invalid; '+response.statusMessage));
         }
       } else {
-        reject(new RequestError('error','Unknown HTTP request error.'));
+        reject(new RequestError('error', 'Unknown HTTP request error.'));
       }
     });
   });
@@ -83,7 +83,7 @@ export async function xmlRequest(options) {
     method: options.method,
     data: options.data,
     headers: options.headers,
-    accepts: 'application/xml'
+    accepts: 'application/xml',
   };
   const {response, body} = await request(requestOptions);
   try {
@@ -100,7 +100,7 @@ export async function xmlRequest(options) {
  */
 export async function getTokensFromPage() {
   const {body} = await request({
-    url: config.getParsedUrl().origin+'/'+'html/home.html'
+    url: config.getParsedUrl().origin+'/'+'html/home.html',
   });
   const doc = (new JSDOM(body)).window.document;
   const meta = doc.querySelectorAll('meta[name=csrf_token]');

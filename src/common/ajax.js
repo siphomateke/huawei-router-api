@@ -40,7 +40,7 @@ export async function processXmlResponse(ret, responseMustBeOk=false) {
     }
   } else {
     const errorName = getRouterApiErrorName(rootValue.code);
-    let code = errorName ? errorName.toLowerCase() : rootValue.code
+    let code = errorName ? errorName.toLowerCase() : rootValue.code;
     let message = code;
     if (rootValue.message) message += ' : ' + rootValue.message;
     throw new RouterApiError(code, message);
