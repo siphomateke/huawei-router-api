@@ -67,14 +67,15 @@ export function getUssdResult() {
     url: 'api/ussd/get',
   }).catch(err => {
     if (err instanceof RouterApiError) {
-      if (err.code === 'ERROR_USSD_PROCESSING') {
+      if (err.code === 'api_ussd_processing') {
         return utils.delay(1000).then(() => getUssdResult());
-      } else if (err.code == 'ERROR_USSD_TIMEOUT') {
+      } else if (err.code == 'api_ussd_timeout') {
         releaseUssd();
         return Promise.reject(new RouterError(
           'ussd_timeout'));
       }
     } else {
+      releaseUssd();
       return Promise.reject(err);
     }
   });
