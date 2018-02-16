@@ -3,7 +3,7 @@ import {
   RequestError,
 } from '@/error';
 import * as utils from '@/utils';
-import * as config from '@/config';
+import config from '@/config';
 import {
   processXmlResponse,
   doRSAEncrypt

@@ -4,7 +4,7 @@ import {
 } from '@/error';
 import nodeRequest from 'request';
 import jxon from 'jxon';
-import * as config from '@/config';
+import config from '@/config';
 import {JSDOM} from 'jsdom';
 
 const jar = nodeRequest.jar();

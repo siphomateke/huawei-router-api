@@ -2,6 +2,7 @@
 import {RouterError, RouterApiError} from '@/error';
 import * as utils from '@/utils';
 import * as ajax from '@/ajax';
+import config from '@/config';
 
 /**
  * Get's USSD options from a message string.

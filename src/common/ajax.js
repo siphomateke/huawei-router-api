@@ -4,7 +4,7 @@ import {
   RouterApiError,
   getRouterApiErrorName,
 } from '@/error';
-import * as config from '@/config';
+import config from '@/config';
 import NodeRSA from 'node-rsa';
 import jxon from 'jxon';
 

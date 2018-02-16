@@ -1,6 +1,6 @@
 'use strict';
 import * as ajax from '@/ajax';
-import * as config from '@/config';
+import config from '@/config';
 import shajs from 'sha.js';
 import promiseFinally from 'promise.prototype.finally';
 import * as commonUtils from '$env/utils';

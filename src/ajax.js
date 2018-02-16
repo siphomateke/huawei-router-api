@@ -1,6 +1,6 @@
 'use strict';
 import * as utils from '@/utils';
-import * as config from '@/config';
+import config from '@/config';
 import {RouterError} from '@/error';
 import {
   processXmlResponse,

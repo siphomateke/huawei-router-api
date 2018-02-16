@@ -1,6 +1,6 @@
 'use strict';
 import * as admin from '@/admin';
-import * as config from '@/config';
+import config from '@/config';
 import * as sms from '@/sms';
 import * as ussd from '@/ussd';
 import * as monitoring from '@/monitoring';

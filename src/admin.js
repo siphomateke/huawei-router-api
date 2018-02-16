@@ -1,6 +1,6 @@
 'use strict';
 import * as ajax from '@/ajax';
-import * as config from '@/config';
+import config from '@/config';
 import * as utils from '@/utils';
 
 /**
