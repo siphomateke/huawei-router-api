@@ -63,6 +63,7 @@ external.push(...[
   'babel-runtime/helpers/createClass',
   'babel-runtime/helpers/possibleConstructorReturn',
   'babel-runtime/helpers/inherits',
+  'babel-runtime/helpers/typeof',
 ]);
 
 function getConfig() {
