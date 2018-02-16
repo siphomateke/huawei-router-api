@@ -154,8 +154,7 @@ export function saveAjaxData(options) {
           } else if (token) {
             tokens.push(token);
           } else {
-            return Promise.reject(
-              new RouterError(
+            reject(new RouterError(
                 'ajax_no_tokens', 'Can not get response token'));
           }
           updateTokens(tokens);
