@@ -178,6 +178,7 @@ const errors = {
   'xml_response_not_ok': [],
   'invalid_router_url': [],
   'ussd_timeout': ['ussd'],
+  'ussd_cancelled': ['ussd'],
   'ussd_release_fail': ['ussd'],
   'ajax_no_tokens': ['ajax'],
 };

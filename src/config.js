@@ -17,6 +17,8 @@ export default {
     publicKey: null,
   },
   sms: null,
+  ussdWaitInterval: 1000,
+  ussdTimeout: 20000,
 
   setUrl(_url) {
     this.url = _url;

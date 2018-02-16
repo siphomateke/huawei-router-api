@@ -54,38 +54,54 @@ export function releaseUssd() {
   });
 }
 
-/**
- * @typedef UssdResult
- * @property {string} content
- */
-
-/**
- * Get's the result of a USSD command. Waits for result
- * @return {Promise<UssdResult>}
- */
-export function getUssdResult() {
-  return ajax.getAjaxData({
-    url: 'api/ussd/get',
-  }).catch(err => {
-    if (err instanceof RouterApiError) {
-      if (err.code === 'api_ussd_processing') {
-        return utils.delay(1000).then(() => getUssdResult());
-      } else if (err.code == 'api_ussd_timeout') {
+export class UssdResultRequest {
+  constructor() {
+    this._elapsedTime = 0;
+    this._cancelled = false;
+  }
+  cancel() {
+    this._cancelled = true;
+  }
+  _query() {
+    return ajax.getAjaxData({
+      url: 'api/ussd/get',
+    }).catch(err => {
+      if (err instanceof RouterApiError && err.code === 'api_ussd_processing') {
+        if (this._elapsedTime >= config.ussdTimeout) {
+          return Promise.reject(new RouterError(
+            'ussd_timeout'));
+        }
+        if (this._cancelled) {
+          return Promise.reject(new RouterError('ussd_cancelled'));
+        }
+        return utils.delay(config.ussdWaitInterval).then(() => {
+          this._elapsedTime += config.ussdWaitInterval;
+          return this._query()
+        });
+      } else {
         releaseUssd();
-        return Promise.reject(new RouterError(
-          'ussd_timeout'));
+        return Promise.reject(err);
       }
-    } else {
-      releaseUssd();
-      return Promise.reject(err);
-    }
-  });
+    });
+  }
+  /**
+   * @typedef UssdResult
+   * @property {string} content
+   */
+
+  /**
+   * Get's the result of a USSD command. Waits for result
+   * @return {Promise<UssdResult>}
+   */
+  send() {
+    return this._query();
+  }
 }
 
 /**
  * Sends a USSD command to the router
  * @param {string}   command  the command to send
- * @return {Promise<UssdResult>}
+ * @return {Promise<any>}
  */
 export async function sendUssdCommand(command) {
   return ajax.saveAjaxData({
@@ -96,5 +112,5 @@ export async function sendUssdCommand(command) {
       timeout: '',
     },
     responseMustBeOk: true,
-  }).then(() => getUssdResult());
+  });
 }

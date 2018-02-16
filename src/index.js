@@ -34,7 +34,7 @@ export default {
   ussd: {
     parse: ussd.parse,
     releaseUssd: ussd.releaseUssd,
-    getUssdResult: ussd.getUssdResult,
+    UssdResultRequest: ussd.UssdResultRequest,
     sendUssdCommand: ussd.sendUssdCommand,
   },
   monitoring: {
