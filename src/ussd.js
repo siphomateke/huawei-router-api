@@ -66,20 +66,23 @@ export class UssdResultRequest {
     return ajax.getAjaxData({
       url: 'api/ussd/get',
     }).catch(err => {
-      if (err instanceof RouterApiError && err.code === 'api_ussd_processing') {
-        if (this._elapsedTime >= config.ussdTimeout) {
-          return Promise.reject(new RouterError(
-            'ussd_timeout'));
+      if (err instanceof RouterApiError) {
+        if (err.code === 'api_ussd_processing') {
+          if (this._elapsedTime >= config.ussdTimeout) {
+            return releaseUssd().then(() => Promise.reject(new RouterError(
+              'ussd_timeout')));
+          }
+          if (this._cancelled) {
+            return Promise.reject(new RouterError('ussd_cancelled'));
+          }
+          return utils.delay(config.ussdWaitInterval).then(() => {
+            this._elapsedTime += config.ussdWaitInterval;
+            return this._query()
+          });
+        } else if (err.code == 'api_ussd_timeout') {
+          return releaseUssd().then(() => Promise.reject(err));
         }
-        if (this._cancelled) {
-          return Promise.reject(new RouterError('ussd_cancelled'));
-        }
-        return utils.delay(config.ussdWaitInterval).then(() => {
-          this._elapsedTime += config.ussdWaitInterval;
-          return this._query()
-        });
       } else {
-        releaseUssd();
         return Promise.reject(err);
       }
     });
