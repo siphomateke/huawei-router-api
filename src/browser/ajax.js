@@ -6,7 +6,7 @@ import * as utils from '@/utils';
 import config from '@/config';
 import {
   processXmlResponse,
-  doRSAEncrypt
+  doRSAEncrypt,
 } from '@/common/ajax';
 import jxon from 'jxon';
 
@@ -61,7 +61,7 @@ function xhrRequest(options) {
       reject(new RequestError('timeout', 'XHR timed out'));
     };
     xhr.onerror = () => {
-      reject(new RequestError('error','Unknown HTTP request error.'));
+      reject(new RequestError('error', 'Unknown HTTP request error.'));
     };
     xhr.send(options.data);
   });
@@ -112,7 +112,7 @@ const xmlRequestOptionsKeys = ['url', 'method', 'data'];
  */
 export async function xmlRequest(options) {
   const requestOptions = {
-    mimeType: 'application/xml'
+    mimeType: 'application/xml',
   };
   for (let key of xmlRequestOptionsKeys) {
     if (key in options) {
@@ -124,7 +124,7 @@ export async function xmlRequest(options) {
   if (xhr.responseXML instanceof Document) {
     return {
       data: jxon.xmlToJs(xhr.responseXML),
-      headers: parseHeaders(xhr.getAllResponseHeaders())
+      headers: parseHeaders(xhr.getAllResponseHeaders()),
     };
   } else {
     throw new RequestError('invalid_xml',

@@ -6,12 +6,12 @@ import {
   processXmlResponse,
   objectToXml,
   doRSAEncrypt,
-  isAjaxReturnOk
+  isAjaxReturnOk,
 } from '@/common/ajax';
 import {
   xmlRequest,
   getTokensFromPage,
-  basicRequest
+  basicRequest,
 } from '$env/ajax';
 
 /**
@@ -139,7 +139,7 @@ export function saveAjaxData(options) {
             updateTokens(tokens);
           }
           resolve(processed);
-        } catch(e) {
+        } catch (e) {
           reject(e);
         } finally {
           // get new tokens
@@ -155,7 +155,7 @@ export function saveAjaxData(options) {
             tokens.push(token);
           } else {
             reject(new RouterError(
-                'ajax_no_tokens', 'Can not get response token'));
+              'ajax_no_tokens', 'Can not get response token'));
           }
           updateTokens(tokens);
         }

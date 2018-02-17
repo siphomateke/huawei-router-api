@@ -269,4 +269,4 @@ export default {
     url += 'ussd.xml';
     return ajax.getAjaxData({url: url});
   },
-}
+};
