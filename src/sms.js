@@ -414,9 +414,7 @@ export async function sendSms(options) {
  * @return {Promise<any>}
  */
 export function deleteSms(indices) {
-  const request = indices.map(i => {
-    return {Index: i};
-  });
+  const request = {Index: indices};
   return ajax.saveAjaxData({
     url: 'api/sms/delete-sms',
     request: request,
