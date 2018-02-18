@@ -7,18 +7,20 @@ export default {
   password: null,
   url: null,
   parsedUrl: null,
-  module: null,
-  /**
-   * @property {object} publicKey
-   * @property {string} publicKey.n
-   * @property {string} publicKey.e
-   */
-  encryption: {
-    publicKey: null,
-  },
-  sms: null,
   ussdWaitInterval: 1000,
   ussdTimeout: 20000,
+  api: {
+    module: null,
+    /**
+     * @property {object} publicKey Public RSA keys
+     * @property {string} publicKey.n
+     * @property {string} publicKey.e
+     */
+    encryption: {
+      publicKey: null,
+    },
+    sms: null,
+  },
 
   setUrl(_url) {
     this.url = _url;
@@ -157,17 +159,17 @@ export default {
    * @return {Promise<ConfigModuleSwitchBoolean>}
    */
   async getModuleSwitch() {
-    if (!this.module) {
+    if (!this.api.module) {
       /** @type {ConfigModuleSwitch} */
       const data = await ajax.getAjaxData({url: 'api/global/module-switch'});
-      this.module = {};
+      this.api.module = {};
       for (const key in data) {
         if (Object.prototype.hasOwnProperty.call(data, key)) {
-          this.module[key] = data[key] === '1';
+          this.api.module[key] = data[key] === '1';
         }
       }
     }
-    return this.module;
+    return this.api.module;
   },
 
   /**
@@ -177,17 +179,17 @@ export default {
    */
 
   async getPublicEncryptionKey() {
-    if (!this.encryption.publicKey) {
+    if (!this.api.encryption.publicKey) {
       /**
        * @type {ApiWebserverPublicKey}
        */
       const data = await ajax.getAjaxData({url: 'api/webserver/publickey'});
-      this.encryption.publicKey = {};
-      this.encryption.publicKey.n = data.encpubkeyn;
-      this.encryption.publicKey.e = data.encpubkeye;
-      return this.encryption.publicKey;
+      this.api.encryption.publicKey = {};
+      this.api.encryption.publicKey.n = data.encpubkeyn;
+      this.api.encryption.publicKey.e = data.encpubkeye;
+      return this.api.encryption.publicKey;
     }
-    return this.encryption.publicKey;
+    return this.api.encryption.publicKey;
   },
 
   /**
@@ -216,16 +218,16 @@ export default {
    * @return {Promise<SmsConfig>}
    */
   async getSmsConfig() {
-    if (!this.sms) {
+    if (!this.api.sms) {
       const data = await ajax.getAjaxData({url: 'config/sms/config.xml'});
-      this.sms = {};
+      this.api.sms = {};
       for (const key in data) {
         if (Object.prototype.hasOwnProperty.call(data, key)) {
-          this.sms[key] = parseInt(data[key]);
+          this.api.sms[key] = parseInt(data[key]);
         }
       }
     }
-    return this.sms;
+    return this.api.sms;
   },
 
   /**
