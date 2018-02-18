@@ -20,6 +20,10 @@ export default {
       publicKey: null,
     },
     sms: null,
+    ussd: {
+      prepaid: null,
+      postpaid: null,
+    },
   },
 
   setUrl(_url) {
@@ -251,13 +255,8 @@ export default {
    */
 
   /**
-   * @typedef _UssdConfig
-   * @property {UssdConfigGeneral} General
-   */
-
-  /**
    * @typedef UssdConfig
-   * @property {_UssdConfig} USSD
+   * @property {UssdConfigGeneral} General
    */
 
   /**
@@ -265,10 +264,12 @@ export default {
    * @param {boolean} [postpaid=false] Whether to get the postpaid or prepaid config
    * @return {Promise<UssdConfig>}
    */
-  getUssdConfig(postpaid=false) {
-    let url = 'config/ussd/';
-    url += postpaid ? 'postpaid' : 'prepaid';
-    url += 'ussd.xml';
-    return ajax.getAjaxData({url: url});
+  async getUssdConfig(postpaid=false) {
+    let paidType = postpaid ? 'postpaid' : 'prepaid';
+    if (!this.api.ussd[paidType]) {
+      const data = await ajax.getAjaxData({url: `config/ussd/${paidType}ussd.xml`});
+      this.api.ussd[paidType] = data.USSD;
+    }
+    return this.api.ussd[paidType];
   },
 };
