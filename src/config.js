@@ -73,50 +73,6 @@ export default {
 
   /**
    * @typedef ConfigModuleSwitch
-   * @property {string} ussd_enabled
-   * @property {string} bbou_enabled
-   * @property {string} sms_enabled
-   * @property {string} sdcard_enabled
-   * @property {string} wifi_enabled
-   * @property {string} statistic_enabled
-   * @property {string} help_enabled
-   * @property {string} stk_enabled
-   * @property {string} pb_enabled
-   * @property {string} dlna_enabled
-   * @property {string} ota_enabled
-   * @property {string} wifioffload_enabled
-   * @property {string} cradle_enabled
-   * @property {string} multssid_enable
-   * @property {string} ipv6_enabled
-   * @property {string} monthly_volume_enabled
-   * @property {string} powersave_enabled
-   * @property {string} sntp_enabled
-   * @property {string} encrypt_enabled
-   * @property {string} dataswitch_enabled
-   * @property {string} ddns_enabled
-   * @property {string} sambashare_enabled
-   * @property {string} poweroff_enabled
-   * @property {string} fw_macfilter_enabled
-   * @property {string} ecomode_enabled
-   * @property {string} zonetime_enabled
-   * @property {string} diagnosis_enabled
-   * @property {string} localupdate_enabled
-   * @property {string} cbs_enabled
-   * @property {string} voip_enabled
-   * @property {string} qrcode_enabled
-   * @property {string} charger_enbaled
-   * @property {string} vpn_enabled
-   * @property {string} cs_enable
-   * @property {string} tr069_enabled
-   * @property {string} antenna_enabled
-   * @property {string} aclui_enabled
-   * @property {string} static_route_enabled
-   * @property {string} static_route6_enabled
-   * @property {string} loginusername_enable
-   */
-
-  /**
-   * @typedef ConfigModuleSwitchBoolean
    * @property {boolean} ussd_enabled
    * @property {boolean} bbou_enabled
    * @property {boolean} sms_enabled
@@ -160,11 +116,10 @@ export default {
    */
 
   /**
-   * @return {Promise<ConfigModuleSwitchBoolean>}
+   * @return {Promise<ConfigModuleSwitch>}
    */
   async getModuleSwitch() {
     if (!this.api.module) {
-      /** @type {ConfigModuleSwitch} */
       const data = await ajax.getAjaxData({url: 'api/global/module-switch'});
       this.api.module = {};
       for (const key in data) {
