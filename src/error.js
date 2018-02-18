@@ -162,12 +162,15 @@ export const apiErrorCodes = {
   '125003': 'wrong_session_token',
 };
 
-let errorCategories = [
-  'connection',
-  'api',
-  'ussd',
-  'ajax',
-];
+/**
+ * @enum {string}
+ */
+export const errorCategories = {
+  CONNECTION: 'connection',
+  API: 'api',
+  USSD: 'ussd',
+  AJAX: 'ajax',
+};
 
 const errors = {
   'http_request_error': ['connection'],
@@ -187,8 +190,8 @@ for (let error of Object.values(apiErrorCodes)) {
 }
 
 /**
- *
  * @param {string} code
+ * @return {string}
  */
 export function getRouterApiErrorName(code) {
   if (typeof code !== 'string') {
