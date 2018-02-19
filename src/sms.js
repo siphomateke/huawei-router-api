@@ -108,7 +108,8 @@ function getType(info, message) {
       return types.DATA_PERCENT;
     }
   }
-  if (ml.includes('activated') && ml.includes('bundle')) {
+  if (ml.includes('activated') &&
+  (ml.includes('bundle') || ml.includes('activated successfully'))) {
     return types.ACTIVATED;
   }
   if (ml.includes('depleted') && ml.includes('bundle')) {
