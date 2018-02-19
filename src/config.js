@@ -100,8 +100,10 @@ class ApiConfig {
  * @property {PublicKey} publicKey Public RSA keys
  */
 
+// TODO: Investigate what cbschannellist contains in SmsConfig. It's probably an array
 /**
  * @typedef SmsConfig
+ * @property {any} cbschannellist
  * @property {number} cbsenable
  * @property {number} cdma_enabled
  * @property {number} enable
@@ -149,7 +151,21 @@ class ApiConfig {
 /** @type {Object.<string, ApiConfig>}*/
 let apiConfigs = {
   module: new ApiConfig('api/global/module-switch', {map: item => item === 1}),
-  sms: new ApiConfig('config/sms/config.xml', {map: item => parseInt(item)}),
+  sms: new ApiConfig('config/sms/config.xml', {
+    converter: data => {
+      const processed = {};
+      for (const key in data) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
+          if (key.toLowerCase() !== 'cbschannellist') {
+            processed[key] = parseInt(data[key]);
+          } else {
+            processed[key] = data[key];
+          }
+        }
+      }
+      return processed;
+    },
+  }),
   prepaidussd: new ApiConfig('config/ussd/prepaidussd.xml'),
   postpaidussd: new ApiConfig('config/ussd/postpaidussd.xml'),
   enc: new ApiConfig('api/webserver/publickey', {
