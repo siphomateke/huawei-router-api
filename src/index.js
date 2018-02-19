@@ -39,6 +39,7 @@ export default {
   },
   monitoring: {
     getTrafficStatistics: monitoring.getTrafficStatistics,
+    checkNotifications: monitoring.checkNotifications,
   },
   utils: {
     ping: utils.ping,

@@ -23,3 +23,24 @@ export function getTrafficStatistics() {
     url: 'api/monitoring/traffic-statistics',
   });
 }
+
+/**
+ * @typedef Notifications
+ * @property {number} unreadmessage
+ * @property {boolean} smsstoragefull
+ * @property {number} onlineupdatestatus
+*/
+
+/**
+ * @return {Promise<Notifications>}
+ */
+export async function checkNotifications() {
+  const ret = await ajax.getAjaxData({
+    url: 'api/monitoring/check-notifications',
+  });
+  return {
+    unreadmessage: ret.unreadmessage,
+    smsstoragefull: ret.smsstoragefull === '1',
+    onlineupdatestatus: ret.onlineupdatestatus,
+  };
+}
