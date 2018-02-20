@@ -1,2 +1,2 @@
-import browser from './src/index';
+import browser from './dist/browser.es';
 export default browser;
