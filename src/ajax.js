@@ -82,6 +82,21 @@ export function updateTokens(newTokens) {
   tokens = newTokens;
 }
 
+/**
+ * Converts headers keys to lower case
+ * @param {Object.<string, string>} headers
+ * @return {Object.<string, string>}
+ */
+function headersToLowerCase(headers) {
+  let lowerCaseHeaders = {};
+  for (let header in headers) {
+    if (headers.hasOwnProperty(header)) {
+      lowerCaseHeaders[header.toLowerCase()] = headers[header];
+    }
+  }
+  return lowerCaseHeaders;
+}
+
 const ajaxQueue = new utils.Queue();
 
 /**
@@ -143,9 +158,10 @@ export function saveAjaxData(options) {
           reject(e);
         } finally {
           // get new tokens
-          const token = ret.headers['__requestverificationtoken'];
-          const token1 = ret.headers['__requestverificationtokenone'];
-          const token2 = ret.headers['__requestverificationtokentwo'];
+          const lowerCaseHeaders = headersToLowerCase(ret.headers);
+          const token = lowerCaseHeaders['__requestverificationtoken'];
+          const token1 = lowerCaseHeaders['__requestverificationtokenone'];
+          const token2 = lowerCaseHeaders['__requestverificationtokentwo'];
           if (token1) {
             tokens.push(token1);
             if (token2) {
