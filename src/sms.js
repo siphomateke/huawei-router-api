@@ -331,13 +331,13 @@ export function setSmsAsRead(idx) {
 
 export function createSmsRequest(options) {
   options = Object.assign({
-    smsIndex: -1,
+    index: -1,
     numbers: [],
     content: '',
   }, options);
 
   return {
-    Index: options.smsIndex,
+    Index: options.index,
     Phones: {
       Phone: options.numbers,
     },
@@ -355,7 +355,7 @@ export function createSmsRequest(options) {
 
 /**
  * @typedef SaveSmsOptions
- * @property {number} smsIndex The index of the  Only used for sending drafts
+ * @property {number} index The index of the  Only used for sending drafts
  * @property {string[]} numbers An array of numbers to send the sms to
  * @property {string} content The SMS body
  */
