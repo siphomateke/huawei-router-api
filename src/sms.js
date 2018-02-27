@@ -406,6 +406,7 @@ export async function sendSms(options) {
   await ajax.saveAjaxData({
     url: 'api/sms/send-sms',
     request: createSmsRequest(options),
+    responseMustBeOk: true,
   });
   return getSmsSendStatus();
 }
@@ -417,6 +418,7 @@ export async function cancelSendSms() {
   await ajax.saveAjaxData({
     url: 'api/sms/cancel-send',
     request: 1,
+    responseMustBeOk: true,
   });
   return getSmsSendStatus();
 }
