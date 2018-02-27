@@ -365,6 +365,7 @@ export function createSmsRequest(options) {
  * @param {SaveSmsOptions} options
  * @return {Promise<boolean>}
  */
+// TODO: Find out what pb and cancelSendSms is in original router
 export function saveSms(options) {
   return ajax.saveAjaxData({
     url: 'api/sms/save-sms',
@@ -405,6 +406,17 @@ export async function sendSms(options) {
   await ajax.saveAjaxData({
     url: 'api/sms/send-sms',
     request: createSmsRequest(options),
+  });
+  return getSmsSendStatus();
+}
+
+/**
+ * @return {Promise<SmsSendStatus>}
+ */
+export async function cancelSendSms() {
+  await ajax.saveAjaxData({
+    url: 'api/sms/cancel-send',
+    request: 1,
   });
   return getSmsSendStatus();
 }

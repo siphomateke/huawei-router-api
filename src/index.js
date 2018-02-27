@@ -29,6 +29,7 @@ export default {
     saveSms: sms.saveSms,
     getSmsSendStatus: sms.getSmsSendStatus,
     sendSms: sms.sendSms,
+    cancelSendSms: sms.cancelSendSms,
     deleteSms: sms.deleteSms,
   },
   ussd: {
