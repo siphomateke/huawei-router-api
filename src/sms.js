@@ -7,12 +7,12 @@ import config from '@/config';
  * @enum {string}
  */
 export const types = {
-  RECHARGE: 'RECHARGE',
-  DATA: 'DATA',
-  DATA_PERCENT: 'DATA_PERCENT',
-  ACTIVATED: 'ACTIVATED',
-  DEPLETED: 'DEPLETED',
-  AD: 'AD',
+  RECHARGE: 'recharge',
+  DATA: 'data',
+  DATA_PERCENT: 'data_percent',
+  ACTIVATED: 'activated',
+  DEPLETED: 'depleted',
+  AD: 'ad',
 };
 
 /**
