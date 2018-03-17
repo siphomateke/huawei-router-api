@@ -154,7 +154,14 @@ export function parse(message) {
  * @return {Promise<SmsCount>}
  */
 export async function getSmsCount() {
-  return ajax.getAjaxData({url: 'api/sms/sms-count'});
+  const data = await ajax.getAjaxData({url: 'api/sms/sms-count'});
+  const processed = {};
+  for (const key in data) {
+    if (data.hasOwnProperty(key)) {
+      processed[key] = parseInt(data[key], 10);
+}
+  }
+  return processed;
 }
 
 /**
