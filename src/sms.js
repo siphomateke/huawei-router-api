@@ -356,7 +356,7 @@ export function createSmsRequest(options) {
     // SMS_TEXT_MODE_7BIT = 1
     // SMS_TEXT_MODE_8BIT = 2
     Reserved: 1,
-    Date: moment(Date.now()).format('Y-M-D H:mm:ss'),
+    Date: moment(Date.now()).format('Y-M-D HH:mm:ss'),
   };
 }
 
