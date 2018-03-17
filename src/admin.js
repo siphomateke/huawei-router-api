@@ -16,9 +16,9 @@ import * as utils from '@/utils';
 export async function getLoginState() {
   const data = await ajax.getAjaxData({url: 'api/user/state-login'});
   return {
-    State: parseInt(data.State),
+    State: parseInt(data.State, 10),
     Username: data.Username,
-    password_type: parseInt(data.password_type),
+    password_type: parseInt(data.password_type, 10),
   };
 }
 

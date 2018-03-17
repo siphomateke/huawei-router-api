@@ -157,7 +157,7 @@ let apiConfigs = {
       for (const key in data) {
         if (Object.prototype.hasOwnProperty.call(data, key)) {
           if (key.toLowerCase() !== 'cbschannellist') {
-            processed[key] = parseInt(data[key]);
+            processed[key] = parseInt(data[key], 10);
           } else {
             processed[key] = data[key];
           }
