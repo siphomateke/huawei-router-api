@@ -139,27 +139,41 @@ export function parse(message) {
  * @property {number} LocalOutbox
  * @property {number} LocalDraft
  * @property {number} LocalDeleted
+ * @property {number} LocalTotal computed value
  * @property {number} SimUnread
  * @property {number} SimInbox
  * @property {number} SimOutbox
  * @property {number} SimDraft
  * @property {number} LocalMax
  * @property {number} SimMax
- * @property {number} SimUsed
+ * @property {number} [SimUsed]
+ * @property {number} SimTotal equal to SimUsed if it exists, otherwise computed
  * @property {number} NewMsg
  */
 
 /**
  * Gets the number of read and unread messages
+ * @param {boolean} [includeComputed=true]
  * @return {Promise<SmsCount>}
  */
-export async function getSmsCount() {
+export async function getSmsCount(includeComputed=true) {
   const data = await ajax.getAjaxData({url: 'api/sms/sms-count'});
   const processed = {};
   for (const key in data) {
     if (data.hasOwnProperty(key)) {
       processed[key] = parseInt(data[key], 10);
 }
+  }
+  if (includeComputed) {
+  let simTotal;
+  if ('SimUsed' in processed) {
+    simTotal = processed.SimUsed;
+  } else {
+    simTotal = processed.SimInbox + processed.SimOutbox + processed.SimDraft;
+  }
+  processed.SimTotal = simTotal;
+  let localTotal = processed.LocalInbox + processed.LocalOutbox + processed.LocalDraft + processed.LocalDeleted;
+  processed.LocalTotal = localTotal;
   }
   return processed;
 }
