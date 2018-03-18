@@ -11,7 +11,7 @@ import jxon from 'jxon';
  * @return {boolean} if the response is ok
  */
 export function isAjaxReturnOk(ret) {
-  return ret.toLowerCase() === 'ok';
+  return typeof ret === 'string' && ret.toLowerCase() === 'ok';
 }
 
 /**
