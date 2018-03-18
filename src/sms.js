@@ -2,6 +2,7 @@
 import moment from 'moment';
 import * as ajax from '@/ajax';
 import config from '@/config';
+import {RouterError, throwApiError} from '@/error';
 
 /**
  * @enum {string}
@@ -162,18 +163,18 @@ export async function getSmsCount(includeComputed=true) {
   for (const key in data) {
     if (data.hasOwnProperty(key)) {
       processed[key] = parseInt(data[key], 10);
-}
+    }
   }
   if (includeComputed) {
-  let simTotal;
-  if ('SimUsed' in processed) {
-    simTotal = processed.SimUsed;
-  } else {
-    simTotal = processed.SimInbox + processed.SimOutbox + processed.SimDraft;
-  }
-  processed.SimTotal = simTotal;
-  let localTotal = processed.LocalInbox + processed.LocalOutbox + processed.LocalDraft + processed.LocalDeleted;
-  processed.LocalTotal = localTotal;
+    let simTotal;
+    if ('SimUsed' in processed) {
+      simTotal = processed.SimUsed;
+    } else {
+      simTotal = processed.SimInbox + processed.SimOutbox + processed.SimDraft;
+    }
+    processed.SimTotal = simTotal;
+    let localTotal = processed.LocalInbox + processed.LocalOutbox + processed.LocalDraft + processed.LocalDeleted;
+    processed.LocalTotal = localTotal;
   }
   return processed;
 }
@@ -456,4 +457,65 @@ export function deleteSms(indices) {
     request: request,
     responseMustBeOk: true,
   });
+}
+
+/**
+ * Checks if:
+ * - importing is a feature of this router
+ * - there are any messages to import
+ * - there is enough space
+ * @return {Promise<boolean>}
+ * @throws {RouterError}
+ */
+export async function readyToImport() {
+  const smsConfig = await config.getSmsConfig();
+  if (!smsConfig.import_enabled) {
+    throw new RouterError('sms_import_disabled');
+  }
+  const smsCount = await getSmsCount();
+  if (smsCount.SimTotal == 0 ) {
+    throw new RouterError('sms_import_sim_empty');
+  }
+  if (smsCount.LocalTotal >= smsCount.LocalMax) {
+    throw new RouterError('sms_not_enough_space');
+  }
+  return true;
+}
+
+/**
+ * @typedef importMessagesResponse
+ * @property {number} successNumber
+ * @property {number} failNumber
+ */
+
+/**
+ * Import's messages from the sim card
+ * @param {boolean} checkIfReady Whether to call readyToImport. Set this to false if you want to check if importing is ready on your own
+ * @return {Promise<importMessagesResponse>}
+ * @throws {RouterError}
+ */
+export async function importMessages(checkIfReady=true) {
+  if (checkIfReady) {
+    await readyToImport();
+  }
+  const data = await ajax.saveAjaxData({
+    url: 'api/sms/backup-sim',
+    request: {
+      IsMove: 0,
+      Date: moment(Date.now()).format('Y-M-D HH:mm:ss'),
+    },
+  });
+
+  if ('SucNumber' in data && data.SucNumber !== '' &&
+    'FailNumber' in data && data.FailNumber !== '') {
+    const successNumber = parseInt(data.SucNumber, 10);
+    const failNumber = parseInt(data.FailNumber, 10);
+    if (data.Code.toLowerCase() === 'ok' || successNumber > 0) {
+      return {successNumber, failNumber};
+    } else {
+      throwApiError(data.Code);
+    }
+  } else {
+    throw new RouterError('sms_import_invalid_response', 'Number succeeded and failed were empty. Response was: ' + JSON.stringify(data));
+  }
 }

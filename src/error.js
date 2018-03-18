@@ -183,6 +183,11 @@ const errors = {
   'ussd_cancelled': ['ussd'],
   'ussd_release_fail': ['ussd'],
   'ajax_no_tokens': ['ajax'],
+  'sms_import_disabled': ['sms'],
+  'sms_import_invalid_response': ['sms'],
+  'sms_import_sim_empty': ['sms'],
+  // TODO: Check if this ever clashes with RouterApiError
+  'sms_not_enough_space': ['sms'],
 };
 
 for (let error of Object.values(apiErrorCodes)) {

@@ -31,6 +31,7 @@ export default {
     sendSms: sms.sendSms,
     cancelSendSms: sms.cancelSendSms,
     deleteSms: sms.deleteSms,
+    importMessages: sms.importMessages,
   },
   ussd: {
     parse: ussd.parse,
