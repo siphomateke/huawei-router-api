@@ -200,6 +200,20 @@ export function getRouterApiErrorName(code) {
   return apiErrorCodes[code];
 }
 
+/**
+ * Throws a RouterApiError using a code and or message.
+ * @param {*} retCode The error code of the API error
+ * @param {string} [retMessage=null] The error message, if any
+ * @throws {RouterApiError}
+ */
+export function throwApiError(retCode, retMessage=null) {
+  const errorName = getRouterApiErrorName(retCode);
+  let code = errorName ? errorName.toLowerCase() : retCode;
+  let message = code;
+  if (retMessage) message += ' : ' + retMessage;
+  throw new RouterApiError(code, message);
+}
+
 export function isErrorInCategory(errorCode, category) {
   return errors[errorCode].includes(category);
 }

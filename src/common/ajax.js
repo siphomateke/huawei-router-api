@@ -1,9 +1,5 @@
 'use strict';
-import {
-  RouterError,
-  RouterApiError,
-  getRouterApiErrorName,
-} from '@/error';
+import {RouterError, throwApiError} from '@/error';
 import config from '@/config';
 import NodeRSA from 'node-rsa';
 import jxon from 'jxon';
@@ -39,11 +35,7 @@ export async function processXmlResponse(ret, responseMustBeOk=false) {
       return rootValue;
     }
   } else {
-    const errorName = getRouterApiErrorName(rootValue.code);
-    let code = errorName ? errorName.toLowerCase() : rootValue.code;
-    let message = code;
-    if (rootValue.message) message += ' : ' + rootValue.message;
-    throw new RouterApiError(code, message);
+    throwApiError(rootValue.code, rootValue.message);
   }
 }
 
