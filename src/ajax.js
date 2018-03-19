@@ -42,7 +42,17 @@ export async function getAjaxData(options) {
     url: parsedUrl.origin + '/' + options.url,
     headers,
   });
-  return processXmlResponse(ret.data, options.responseMustBeOk);
+  try {
+    const processed = await processXmlResponse(ret.data, options.responseMustBeOk);
+    return processed;
+  } catch (e) {
+    if (e instanceof RouterError && e.code === 'api_wrong_token') {
+      await refreshTokens();
+      return getAjaxData(options);
+    } else {
+      throw e;
+    }
+  }
 }
 
 // TODO: Improve token storage
@@ -156,7 +166,12 @@ export function saveAjaxData(options) {
           }
           resolve(processed);
         } catch (e) {
-          reject(e);
+          if (e instanceof RouterError && e.code === 'api_wrong_token') {
+            await refreshTokens();
+            saveAjaxData(options).then(resolve, reject);
+          } else {
+            reject(e);
+          }
         } finally {
           // get new tokens
           const lowerCaseHeaders = headersToLowerCase(ret.headers);
@@ -176,8 +191,8 @@ export function saveAjaxData(options) {
           }
           updateTokens(tokens);
         }
-      } catch (err) {
-        reject(err);
+      } catch (e) {
+        reject(e);
       }
     });
   });
