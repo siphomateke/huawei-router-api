@@ -108,18 +108,18 @@ function getType(info, message) {
   if (info.data.length > 0) {
     /**
      * Examples:
+     * - Y'ello, you have used up 90% of your 10240 MB Data Bundle.
+     */
+    if (ml.search(/\d+%/) > 0) {
+      return types.DATA_PERCENT;
+    }
+    /**
+     * Examples:
      * - You have Data 6.78 MB Home Data Valid until 2017-01-27 00:00:00.CONGRATS! You have a chance to win a CAR! SMS WIN to 669! Cost K0.50. TCs apply
      * - Y'ello! You have 4559.28 MB MTN Home Day Data.
      */
     if (info.expires.length > 0 || (ml.includes('have') && ml.includes('data'))) {
       return types.DATA;
-    }
-    /**
-     * Examples:
-     * - Y'ello, you have used up 90% of your 10240 MB Data Bundle.
-     */
-    if (ml.search(/\d+%/) > 0) {
-      return types.DATA_PERCENT;
     }
   }
   /**
