@@ -54,7 +54,7 @@ function getDataUsage(message) {
 function getExpiryDate(message) {
   return arrayMatch(
     message, /(\d+)-(\d+)-(\d+) (\d{2}):(\d{2}):(\d{2})/g,
-    date => moment(date));
+    date => moment(date).valueOf());
 }
 function getMoney(message) {
   return arrayMatch(
@@ -270,7 +270,7 @@ function filterSmsList(options, list) {
   const filteredList = [];
   for (const message of list) {
     if (options && options.minDate) {
-      if (Date.parse(message.Date) > options.minDate) {
+      if (moment(message.Date).valueOf() > options.minDate) {
         filteredList.push(message);
       }
     } else {
