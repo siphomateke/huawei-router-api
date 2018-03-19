@@ -98,22 +98,44 @@ function getType(info, message) {
     }
   }
   const ml = message.toLowerCase();
+  /**
+   * Examples:
+   * - The recharged amount is 50.000 kwacha.Your current balance is 250.522 kwacha..With MTN everyone is a winner, Earn more Ni Zee points by RECHARGING NOW! Dial *1212#!
+   */
   if (info.money.length >= 2 && ml.includes('recharged') && ml.includes('balance')) {
     return types.RECHARGE;
   }
   if (info.data.length > 0) {
-    if (info.expires.length > 0) {
+    /**
+     * Examples:
+     * - You have Data 6.78 MB Home Data Valid until 2017-01-27 00:00:00.CONGRATS! You have a chance to win a CAR! SMS WIN to 669! Cost K0.50. TCs apply
+     * - Y'ello! You have 4559.28 MB MTN Home Day Data.
+     */
+    if (info.expires.length > 0 || (ml.includes('have') && ml.includes('data'))) {
       return types.DATA;
     }
+    /**
+     * Examples:
+     * - Y'ello, you have used up 90% of your 10240 MB Data Bundle.
+     */
     if (ml.search(/\d+%/) > 0) {
       return types.DATA_PERCENT;
     }
   }
+  /**
+   * Examples:
+   * - Y'ello! Your 10GB MTN Home Internet Bundle (Once-Off) has been activated successfully.
+   */
   if (ml.includes('activated') &&
   (ml.includes('bundle') || ml.includes('activated successfully'))) {
     return types.ACTIVATED;
   }
-  if (ml.includes('depleted') && ml.includes('bundle')) {
+  /**
+   * Examples:
+   * - Dear Customer, You have depleted your 10240 MB data bundle. Your main balance is K 0.6154. Dial *335# to buy another pack.
+   * - You have used all your Data Bundle.Your main balance is K 10.5228.Dial *335# to purchase a Bundle Now.
+   */
+  if ((ml.includes('depleted') || ml.includes('used all')) && ml.includes('bundle')) {
     return types.DEPLETED;
   }
   return types.AD;
