@@ -69,10 +69,11 @@ export async function refreshTokens() {
 
 /**
  *
+ * @param {boolean} fresh Set to true to force getting new tokens instead of using cached ones
  * @return {Promise<string[]>}
  */
-export async function getTokens() {
-  if (!tokens) {
+export async function getTokens(fresh=false) {
+  if (!tokens || fresh) {
     await refreshTokens();
   }
   return tokens;
