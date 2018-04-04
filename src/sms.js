@@ -202,8 +202,18 @@ export async function getSmsCount(includeComputed=true) {
 }
 
 /**
+ * @enum {number}
+ */
+export const SmstatTypes = {
+  UNREAD: 0,
+  READ: 1,
+  SIM: 2,
+  SENT: 3,
+};
+
+/**
  * @typedef Message
- * @property {number} Smstat Whether the message is unread(0), read(1) or a draft(2) on the SIM card.
+ * @property {number} Smstat Sms status? @see SmstatTypes
  * @property {number} Index
  * @property {string|number} Phone The phone number from which the SMS was sent
  * @property {string} Content The actual content of the SMS
