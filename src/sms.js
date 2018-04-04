@@ -23,6 +23,13 @@ export const boxTypes = {
   INBOX: 1,
   SENT: 2,
   DRAFT: 3,
+  TRASH: 4,
+  SIM_INBOX: 5,
+  SIM_SENT: 6,
+  SIM_DRAFT: 7,
+  MIX_INBOX: 8,
+  MIX_SENT: 9,
+  MIX_DRAFT: 10,
 };
 
 function arrayMatch(message, regExpMatch, mapFunc) {
