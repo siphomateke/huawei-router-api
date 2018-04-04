@@ -219,7 +219,7 @@ export async function getSmsCount(includeComputed=true) {
  * @typedef SmsListOptions
  * @property {number} [page=1]
  * @property {number} [perPage=20]
- * @property {boxTypes} [boxType=1] Which box to retreive. Can be Inbox(1), sent(2) or draft(3)
+ * @property {number} [boxType=1] Which box to retreive. Can be Inbox(1), sent(2) or draft(3)
  * @property {('desc'|'asc')} [sortOrder=desc]
 */
 
