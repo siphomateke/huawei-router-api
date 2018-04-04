@@ -203,7 +203,7 @@ export async function getSmsCount(includeComputed=true) {
 
 /**
  * @typedef Message
- * @property {number} Smstat Whether the message is read or not
+ * @property {number} Smstat Whether the message is unread(0), read(1) or a draft(2) on the SIM card.
  * @property {number} Index
  * @property {string|number} Phone The phone number from which the SMS was sent
  * @property {string} Content The actual content of the SMS
