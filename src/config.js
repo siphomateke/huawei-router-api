@@ -150,7 +150,7 @@ class ApiConfig {
 
 /** @type {Object.<string, ApiConfig>}*/
 let apiConfigs = {
-  module: new ApiConfig('api/global/module-switch', {map: item => item === 1}),
+  module: new ApiConfig('api/global/module-switch', {map: item => item === '1'}),
   sms: new ApiConfig('config/sms/config.xml', {
     converter: data => {
       const processed = {};
