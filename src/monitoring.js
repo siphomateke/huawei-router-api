@@ -21,6 +21,7 @@ import * as ajax from '@/ajax';
 export function getTrafficStatistics() {
   return ajax.getAjaxData({
     url: 'api/monitoring/traffic-statistics',
+    map: item => parseInt(item, 10),
   });
 }
 
