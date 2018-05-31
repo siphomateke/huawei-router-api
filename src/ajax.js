@@ -15,10 +15,40 @@ import {
 } from '$env/ajax';
 
 /**
+ * @typedef ResponseProcessorOptions
+ * @property {function} [map]
+ * @property {function} [converter]
+ */
+
+/**
+ * Applies common conversions to AJAX responses
+ * @param {object} response
+ * @param {ResponseProcessorOptions} options
+ * @return {object}
+ */
+function convertResponse(response, options) {
+  let processed = response;
+  if (options.map) {
+    processed = {};
+    for (const key in response) {
+      if (Object.prototype.hasOwnProperty.call(response, key)) {
+        processed[key] = options.map(response[key]);
+      }
+    }
+  }
+  if (options.converter) {
+    processed = options.converter(processed);
+  }
+  return processed;
+}
+
+/**
  * @typedef GetAjaxDataOptions
  * @property {string} url The url to get ajax data from
  * @property {boolean} [responseMustBeOk]
  * @property {string} [routerUrl] The url of the router. E.g. http://192.168.8.1
+ * @property {function} [converter]
+ * @property {function} [map]
  */
 
 /**
@@ -44,7 +74,7 @@ export async function getAjaxData(options) {
   });
   try {
     const processed = await processXmlResponse(ret.data, options.responseMustBeOk);
-    return processed;
+    return convertResponse(processed, options);
   } catch (e) {
     if (e instanceof RouterError && e.code === 'api_wrong_token') {
       await refreshTokens();
@@ -117,6 +147,8 @@ const ajaxQueue = new utils.Queue();
  * @property {boolean} [responseMustBeOk]
  * @property {boolean} [enc] Whether the request should be encrypted
  * @property {boolean} [enp]
+ * @property {function} [converter]
+ * @property {function} [map]
  */
 
 /**
@@ -164,7 +196,7 @@ export function saveAjaxData(options) {
             tokens = [];
             updateTokens(tokens);
           }
-          resolve(processed);
+          resolve(convertResponse(processed, options));
         } catch (e) {
           if (e instanceof RouterError && e.code === 'api_wrong_token') {
             await refreshTokens();
