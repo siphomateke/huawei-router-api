@@ -40,13 +40,7 @@ export default {
     UssdResultRequest: ussd.UssdResultRequest,
     sendUssdCommand: ussd.sendUssdCommand,
   },
-  monitoring: {
-    getTrafficStatistics: monitoring.getTrafficStatistics,
-    checkNotifications: monitoring.checkNotifications,
-    resetStatistics: monitoring.resetStatistics,
-    getDataUsageSettings: monitoring.getDataUsageSettings,
-    setDataUsageSettings: monitoring.setDataUsageSettings,
-  },
+  monitoring,
   utils: {
     ping: utils.ping,
   },
