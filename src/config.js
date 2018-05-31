@@ -149,6 +149,51 @@ class ApiConfig {
  * @property {UssdConfigGeneral} General
  */
 
+/**
+ * @typedef DialupProfile
+ * @property {number} Index 1
+ * @property {boolean} IsValid 1
+ * @property {string} Name PLAY
+ * @property {boolean} ApnIsStatic 1
+ * @property {string} ApnName internet
+ * @property {string} DialupNum *99#
+ * @property {string} Username
+ * @property {string} Password
+ * @property {number} AuthMode 2
+ * @property {boolean} IpIsStatic 0
+ * @property {string} IpAddress
+ * @property {string} Ipv6Address
+ * @property {boolean} DnsIsStatic 0
+ * @property {string} PrimaryDns
+ * @property {string} SecondaryDns
+ * @property {string} PrimaryIpv6Dns
+ * @property {string} SecondaryIpv6Dns
+ * @property {number} ReadOnly 2
+ * @property {number} iptype 2
+ */
+
+/**
+ * @typedef DialupProfiles
+ * @property {number} CurrentProfile
+ * @property {DialupProfile[]} Profiles
+ */
+
+/**
+ * @typedef DialupConnection
+ * @property {boolean} RoamAutoConnectEnable
+ * @property {number} MaxIdelTime e.g 600
+ * @property {0|1|2} ConnectMode 0-auto, 1-manual, 2-combining on demand
+ * @property {number} MTU e.g 1500, 1450
+ * @property {boolean} auto_dial_switch
+ * @property {boolean} pdp_always_on
+ */
+
+/**
+ * @typedef DialupFeatureSwitch
+ * @property {boolean} iptype_enabled
+ * @property {boolean} auto_dial_enabled
+ * @property {boolean} show_dns_setting
+ */
 
 let apiConfigs = {
   module: new ApiConfig('api/global/module-switch', {map: item => item === '1'}),
@@ -176,7 +221,60 @@ let apiConfigs = {
       return {publicKey: {n: data.encpubkeyn, e: data.encpubkeye}};
     },
   }),
+  dialup: {
+    connection: new ApiConfig('api/dialup/connection', {
+      converter: data => {
+        return {
+          RoamAutoConnectEnable: data.RoamAutoConnectEnable === '1',
+          MaxIdelTime: parseInt(data.MaxIdelTime, 10),
+          ConnectMode: parseInt(data.ConnectMode, 10),
+          MTU: parseInt(data.MTU, 10),
+          auto_dial_switch: data.auto_dial_switch === '1',
+          pdp_always_on: data.pdp_always_on === '1',
         };
+      },
+    }),
+    profiles: new ApiConfig('api/dialup/profiles', {
+      converter: data => {
+        let profiles = [];
+        // TODO: Make sure this doesn't break when there is more than one profile
+        for (const key in data.Profiles) {
+          if (data.Profiles.hasOwnProperty(key)) {
+            const profile = data.Profiles[key];
+            profiles.push({
+              Index: parseInt(profile.Index, 10),
+              IsValid: profile.IsValid === '1',
+              Name: profile.Name,
+              ApnIsStatic: profile.ApnIsStatic === '1',
+              ApnName: profile.ApnName,
+              DialupNum: profile.DialupNum,
+              Username: profile.Username,
+              Password: profile.Password,
+              AuthMode: parseInt(profile.AuthMode, 10),
+              IpIsStatic: profile.IpIsStatic === '1',
+              IpAddress: profile.IpAddress,
+              Ipv6Address: profile.Ipv6Address,
+              DnsIsStatic: profile.DnsIsStatic === '1',
+              PrimaryDns: profile.PrimaryDns,
+              SecondaryDns: profile.SecondaryDns,
+              PrimaryIpv6Dns: profile.PrimaryIpv6Dns,
+              SecondaryIpv6Dns: profile.SecondaryIpv6Dns,
+              ReadOnly: parseInt(profile.ReadOnly, 10),
+              iptype: parseInt(profile.iptype, 10),
+            });
+          }
+        }
+        return {
+          CurrentProfile: parseInt(data.CurrentProfile, 10),
+          Profiles: profiles,
+        };
+      },
+    }),
+    featureSwitch: new ApiConfig('api/dialup/dialup-feature-switch', {
+      map: item => item === '1',
+    }),
+  },
+};
 
 export default {
   username: null,
@@ -199,6 +297,14 @@ export default {
       prepaid: null,
       /** @type {UssdConfig} */
       postpaid: null,
+    },
+    dialup: {
+      /** @type {DialupConnection} */
+      connection: null,
+      /** @type {DialupProfiles} */
+      profiles: null,
+      /** @type {DialupFeatureSwitch} */
+      featureSwitch: null,
     },
   },
 

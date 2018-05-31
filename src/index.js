@@ -5,6 +5,7 @@ import * as sms from '@/sms';
 import * as ussd from '@/ussd';
 import * as monitoring from '@/monitoring';
 import * as utils from '@/utils';
+import * as dialup from '@/dialup';
 import {RouterError, RouterApiError, RequestError, isErrorInCategory} from '@/error';
 
 /**
@@ -51,5 +52,19 @@ export default {
     RouterApiError,
     RequestError,
     isErrorInCategory,
+  },
+  dialup: {
+    getAutoApn: dialup.getAutoApn,
+    setAutoApn: dialup.setAutoApn,
+    getMobileDataSwitch: dialup.getMobileDataSwitch,
+    setMobileDataSwitch: dialup.setMobileDataSwitch,
+    getConnection: dialup.getConnection,
+    setConnection: dialup.setConnection,
+    getProfiles: dialup.getProfiles,
+    deleteProfile: dialup.deleteProfile,
+    addProfile: dialup.addProfile,
+    editProfile: dialup.editProfile,
+    dial: dialup.dial,
+    getFeatureSwitch: dialup.getFeatureSwitch,
   },
 };
