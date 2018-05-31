@@ -108,7 +108,7 @@ export class UssdResultRequest {
  * @param {string}   command  the command to send
  * @return {Promise<any>}
  */
-export async function sendUssdCommand(command) {
+export function sendUssdCommand(command) {
   return ajax.saveAjaxData({
     url: 'api/ussd/send',
     request: {
