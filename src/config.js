@@ -345,7 +345,7 @@ export default {
   },
 
   setConfig(path, value) {
-    dotty.put(this.api, name, value);
+    dotty.put(this.api, path, value);
   },
 
   /**
