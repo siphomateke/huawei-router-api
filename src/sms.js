@@ -378,7 +378,7 @@ export async function getFullSmsList(options, smsListOptions={}) {
 /**
  *
  * @param {number} idx The index of the SMS
- * @return {Promise<Boolean>}
+ * @return {Promise<any>}
  */
 export function setSmsAsRead(idx) {
   return ajax.saveAjaxData({
@@ -424,7 +424,7 @@ export function createSmsRequest(options) {
 /**
  * Sends an sms or saves a draft
  * @param {SaveSmsOptions} options
- * @return {Promise<boolean>}
+ * @return {Promise<any>}
  */
 // TODO: Find out what pb and cancelSendSms is in original router
 export function saveSms(options) {
