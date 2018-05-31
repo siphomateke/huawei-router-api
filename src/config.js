@@ -39,7 +39,90 @@ class ApiConfig {
 
 // TODO: Add config checks and throw errors
 
+let apiConfigs = {
+  module: new ApiConfig('api/global/module-switch', {map: item => item === '1'}),
+  sms: new ApiConfig('config/sms/config.xml', {
+    converter: data => {
+      const processed = {};
+      for (const key in data) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
+          if (key.toLowerCase() !== 'cbschannellist') {
+            processed[key] = parseInt(data[key], 10);
+          } else {
+            processed[key] = data[key];
+          }
+        }
+      }
+      return processed;
+    },
+  }),
+  ussd: {
+    prepaid: new ApiConfig('config/ussd/prepaidussd.xml'),
+    postpaid: new ApiConfig('config/ussd/postpaidussd.xml'),
+  },
+  enc: new ApiConfig('api/webserver/publickey', {
+    converter: data => {
+      return {publicKey: {n: data.encpubkeyn, e: data.encpubkeye}};
+    },
+  }),
+  dialup: {
+    connection: new ApiConfig('api/dialup/connection', {
+      converter: data => {
+        return {
+          RoamAutoConnectEnable: data.RoamAutoConnectEnable === '1',
+          MaxIdelTime: parseInt(data.MaxIdelTime, 10),
+          ConnectMode: parseInt(data.ConnectMode, 10),
+          MTU: parseInt(data.MTU, 10),
+          auto_dial_switch: data.auto_dial_switch === '1',
+          pdp_always_on: data.pdp_always_on === '1',
+        };
+      },
+    }),
+    profiles: new ApiConfig('api/dialup/profiles', {
+      converter: data => {
+        let profiles = [];
+        // TODO: Make sure this doesn't break when there is more than one profile
+        for (const key in data.Profiles) {
+          if (data.Profiles.hasOwnProperty(key)) {
+            const profile = data.Profiles[key];
+            profiles.push({
+              Index: parseInt(profile.Index, 10),
+              IsValid: profile.IsValid === '1',
+              Name: profile.Name,
+              ApnIsStatic: profile.ApnIsStatic === '1',
+              ApnName: profile.ApnName,
+              DialupNum: profile.DialupNum,
+              Username: profile.Username,
+              Password: profile.Password,
+              AuthMode: parseInt(profile.AuthMode, 10),
+              IpIsStatic: profile.IpIsStatic === '1',
+              IpAddress: profile.IpAddress,
+              Ipv6Address: profile.Ipv6Address,
+              DnsIsStatic: profile.DnsIsStatic === '1',
+              PrimaryDns: profile.PrimaryDns,
+              SecondaryDns: profile.SecondaryDns,
+              PrimaryIpv6Dns: profile.PrimaryIpv6Dns,
+              SecondaryIpv6Dns: profile.SecondaryIpv6Dns,
+              ReadOnly: parseInt(profile.ReadOnly, 10),
+              iptype: parseInt(profile.iptype, 10),
+            });
+          }
+        }
+        return {
+          CurrentProfile: parseInt(data.CurrentProfile, 10),
+          Profiles: profiles,
+        };
+      },
+    }),
+    featureSwitch: new ApiConfig('api/dialup/dialup-feature-switch', {
+      map: item => item === '1',
+    }),
+  },
+};
+
 /*
+These were missing from ConfigModuleSwitch when testing:
+
   'autoapn_enabled': g_feature.autoapn_enabled === '1',
   'checklogin_enabled': g_feature.login === '1',
   'ap_station_enabled': g_feature.ap_station_enabled === '1',
@@ -194,87 +277,6 @@ class ApiConfig {
  * @property {boolean} auto_dial_enabled
  * @property {boolean} show_dns_setting
  */
-
-let apiConfigs = {
-  module: new ApiConfig('api/global/module-switch', {map: item => item === '1'}),
-  sms: new ApiConfig('config/sms/config.xml', {
-    converter: data => {
-      const processed = {};
-      for (const key in data) {
-        if (Object.prototype.hasOwnProperty.call(data, key)) {
-          if (key.toLowerCase() !== 'cbschannellist') {
-            processed[key] = parseInt(data[key], 10);
-          } else {
-            processed[key] = data[key];
-          }
-        }
-      }
-      return processed;
-    },
-  }),
-  ussd: {
-    prepaid: new ApiConfig('config/ussd/prepaidussd.xml'),
-    postpaid: new ApiConfig('config/ussd/postpaidussd.xml'),
-  },
-  enc: new ApiConfig('api/webserver/publickey', {
-    converter: data => {
-      return {publicKey: {n: data.encpubkeyn, e: data.encpubkeye}};
-    },
-  }),
-  dialup: {
-    connection: new ApiConfig('api/dialup/connection', {
-      converter: data => {
-        return {
-          RoamAutoConnectEnable: data.RoamAutoConnectEnable === '1',
-          MaxIdelTime: parseInt(data.MaxIdelTime, 10),
-          ConnectMode: parseInt(data.ConnectMode, 10),
-          MTU: parseInt(data.MTU, 10),
-          auto_dial_switch: data.auto_dial_switch === '1',
-          pdp_always_on: data.pdp_always_on === '1',
-        };
-      },
-    }),
-    profiles: new ApiConfig('api/dialup/profiles', {
-      converter: data => {
-        let profiles = [];
-        // TODO: Make sure this doesn't break when there is more than one profile
-        for (const key in data.Profiles) {
-          if (data.Profiles.hasOwnProperty(key)) {
-            const profile = data.Profiles[key];
-            profiles.push({
-              Index: parseInt(profile.Index, 10),
-              IsValid: profile.IsValid === '1',
-              Name: profile.Name,
-              ApnIsStatic: profile.ApnIsStatic === '1',
-              ApnName: profile.ApnName,
-              DialupNum: profile.DialupNum,
-              Username: profile.Username,
-              Password: profile.Password,
-              AuthMode: parseInt(profile.AuthMode, 10),
-              IpIsStatic: profile.IpIsStatic === '1',
-              IpAddress: profile.IpAddress,
-              Ipv6Address: profile.Ipv6Address,
-              DnsIsStatic: profile.DnsIsStatic === '1',
-              PrimaryDns: profile.PrimaryDns,
-              SecondaryDns: profile.SecondaryDns,
-              PrimaryIpv6Dns: profile.PrimaryIpv6Dns,
-              SecondaryIpv6Dns: profile.SecondaryIpv6Dns,
-              ReadOnly: parseInt(profile.ReadOnly, 10),
-              iptype: parseInt(profile.iptype, 10),
-            });
-          }
-        }
-        return {
-          CurrentProfile: parseInt(data.CurrentProfile, 10),
-          Profiles: profiles,
-        };
-      },
-    }),
-    featureSwitch: new ApiConfig('api/dialup/dialup-feature-switch', {
-      map: item => item === '1',
-    }),
-  },
-};
 
 export default {
   username: null,
