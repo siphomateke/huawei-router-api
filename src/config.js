@@ -1,6 +1,7 @@
 'use strict';
 import * as ajax from '@/ajax';
 import * as utils from '@/utils';
+import dotty from 'dotty';
 
 class ApiConfig {
   /**
@@ -148,7 +149,7 @@ class ApiConfig {
  * @property {UssdConfigGeneral} General
  */
 
-/** @type {Object.<string, ApiConfig>}*/
+
 let apiConfigs = {
   module: new ApiConfig('api/global/module-switch', {map: item => item === '1'}),
   sms: new ApiConfig('config/sms/config.xml', {
@@ -166,14 +167,16 @@ let apiConfigs = {
       return processed;
     },
   }),
-  prepaidussd: new ApiConfig('config/ussd/prepaidussd.xml'),
-  postpaidussd: new ApiConfig('config/ussd/postpaidussd.xml'),
+  ussd: {
+    prepaid: new ApiConfig('config/ussd/prepaidussd.xml'),
+    postpaid: new ApiConfig('config/ussd/postpaidussd.xml'),
+  },
   enc: new ApiConfig('api/webserver/publickey', {
     converter: data => {
       return {publicKey: {n: data.encpubkeyn, e: data.encpubkeye}};
     },
   }),
-};
+        };
 
 export default {
   username: null,
@@ -235,16 +238,20 @@ export default {
     return this.parsedUrl;
   },
 
+  setConfig(path, value) {
+    dotty.put(this.api, name, value);
+  },
+
   /**
-   * @param {string} name The name of the config to retrieve
+   * @param {string} path The path of the config to retrieve. E.g. 'ussd.prepaid'
    * @param {boolean} fresh Set to true to refresh cached values
    * @return {Promise<any>}
    */
-  async getConfig(name, fresh=false) {
-    if (!this.api[name] || fresh) {
-      this.api[name] = await apiConfigs[name].get();
+  async getConfig(path, fresh=false) {
+    if (!dotty.exists(this.api, path) || dotty.get(this.api, path) === null || fresh) {
+      this.setConfig(path, await dotty.get(apiConfigs, path).get());
     }
-    return this.api[name];
+    return dotty.get(this.api, path);
   },
 
   /**
@@ -276,6 +283,6 @@ export default {
    */
   async getUssdConfig(postpaid=false) {
     const paidType = postpaid ? 'postpaid' : 'prepaid';
-    return (await this.getConfig(paidType + 'ussd')).USSD;
+    return (await this.getConfig('ussd.'+paidType)).USSD;
   },
 };

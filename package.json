@@ -30,6 +30,7 @@
   "homepage": "https://github.com/nextgensparx/huawei-router-api#readme",
   "dependencies": {
     "babel-runtime": "^6.26.0",
+    "dotty": "^0.1.0",
     "es6-error": "^4.1.1",
     "jsdom": "^11.10.0",
     "jxon": "^2.0.0-beta.5",
