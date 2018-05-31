@@ -22,7 +22,7 @@ export function getAutoApn() {
 export function setAutoApn(state) {
   return ajax.saveAjaxData({
     url: 'api/dialup/auto-apn',
-    request: {AutoAPN: state ? '1' : '0'},
+    request: {AutoAPN: state ? 1 : 0},
   });
 }
 
@@ -45,7 +45,7 @@ export function getMobileDataSwitch() {
 export async function setMobileDataSwitch(state) {
   return ajax.saveAjaxData({
     url: 'api/dialup/mobile-dataswitch',
-    request: {dataswitch: state ? '1' : '0'},
+    request: {dataswitch: state ? 1 : 0},
     responseMustBeOk: true,
   });
 }
