@@ -119,3 +119,14 @@ export async function sendUssdCommand(command) {
     responseMustBeOk: true,
   });
 }
+
+/**
+ * Checks if a USSD request is in progress
+ * @return {Promise<boolean>}
+ */
+export function getUssdStatus() {
+  return ajax.getAjaxData({
+    url: 'api/ussd/status',
+    converter: data => data.result === '1',
+  });
+}

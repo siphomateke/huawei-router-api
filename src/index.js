@@ -39,6 +39,7 @@ export default {
     releaseUssd: ussd.releaseUssd,
     UssdResultRequest: ussd.UssdResultRequest,
     sendUssdCommand: ussd.sendUssdCommand,
+    getUssdStatus: ussd.getUssdStatus,
   },
   monitoring,
   utils: {
