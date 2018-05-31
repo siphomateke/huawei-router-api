@@ -123,11 +123,11 @@ let apiConfigs = {
 /*
 These were missing from ConfigModuleSwitch when testing:
 
-  'autoapn_enabled': g_feature.autoapn_enabled === '1',
-  'checklogin_enabled': g_feature.login === '1',
-  'ap_station_enabled': g_feature.ap_station_enabled === '1',
-  'voip_adcance_enable': voiceadvancesetting === '1',
-  */
+'autoapn_enabled': g_feature.autoapn_enabled === '1',
+'checklogin_enabled': g_feature.login === '1',
+'ap_station_enabled': g_feature.ap_station_enabled === '1',
+'voip_adcance_enable': voiceadvancesetting === '1',
+*/
 
 /**
  * @typedef ConfigModuleSwitch
@@ -365,7 +365,7 @@ export default {
   /**
    * @return {Promise<ConfigModuleSwitch>}
    */
-  async getModuleSwitch() {
+  getModuleSwitch() {
     return this.getConfig('module');
   },
 
@@ -380,7 +380,7 @@ export default {
    * Get's SMS configuration
    * @return {Promise<SmsConfig>}
    */
-  async getSmsConfig() {
+  getSmsConfig() {
     return this.getConfig('sms');
   },
 
