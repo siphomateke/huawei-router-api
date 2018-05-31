@@ -26,9 +26,9 @@ export function getTrafficStatistics() {
 
 /**
  * @typedef Notifications
- * @property {number} unreadmessage
- * @property {boolean} smsstoragefull
- * @property {number} onlineupdatestatus
+ * @property {number} UnreadMessage
+ * @property {boolean} SmsStorageFull
+ * @property {number} OnlineUpdateStatus
 */
 
 /**
@@ -39,8 +39,8 @@ export async function checkNotifications() {
     url: 'api/monitoring/check-notifications',
   });
   return {
-    unreadmessage: ret.unreadmessage,
-    smsstoragefull: ret.smsstoragefull === '1',
-    onlineupdatestatus: ret.onlineupdatestatus,
+    UnreadMessage: parseInt(ret.UnreadMessage, 10),
+    SmsStorageFull: ret.SmsStorageFull === '1',
+    OnlineUpdateStatus: parseInt(ret.OnlineUpdateStatus, 10),
   };
 }
