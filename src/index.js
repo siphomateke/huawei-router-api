@@ -64,5 +64,6 @@ export default {
     editProfile: dialup.editProfile,
     dial: dialup.dial,
     getFeatureSwitch: dialup.getFeatureSwitch,
+    getConnectMode: dialup.getConnectMode,
   },
 };

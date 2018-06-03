@@ -117,6 +117,17 @@ let apiConfigs = {
     featureSwitch: new ApiConfig('api/dialup/dialup-feature-switch', {
       map: item => item === '1',
     }),
+    connectMode: new ApiConfig('config/dialup/connectmode.xml', {
+      converter: data => {
+        return {
+          ConnectMode: {
+            Auto: data.ConnectMode.Auto === '1',
+            Manual: data.ConnectMode.Manual === '1',
+          },
+          idle_time_enabled: parseInt(data.idle_time_enabled, 10),
+        };
+      },
+    }),
   },
 };
 
@@ -278,6 +289,18 @@ These were missing from ConfigModuleSwitch when testing:
  * @property {boolean} show_dns_setting
  */
 
+/**
+ * @typedef ConnectMode
+ * @property {boolean} Auto
+ * @property {boolean} Manual
+ */
+
+/**
+ * @typedef ConnectModeConfig
+ * @property {ConnectMode} ConnectMode
+ * @property {number} idle_time_enabled
+ */
+
 export default {
   username: null,
   password: null,
@@ -307,6 +330,8 @@ export default {
       profiles: null,
       /** @type {DialupFeatureSwitch} */
       featureSwitch: null,
+      /** @type {ConnectModeConfig} */
+      connectMode: null,
     },
   },
 

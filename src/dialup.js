@@ -210,3 +210,12 @@ export function dial(action) {
 export function getFeatureSwitch(fresh=false) {
   return config.getConfig('dialup.featureSwitch', fresh);
 }
+
+/**
+ *
+ * @param {boolean} [fresh=false]
+ * @return {Promise<any>}
+ */
+export function getConnectMode(fresh=false) {
+  return config.getConfig('dialup.connectMode', fresh);
+}
