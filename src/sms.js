@@ -220,7 +220,7 @@ export const SmstatTypes = {
 
 /**
  * @typedef Message
- * @property {number} Smstat Sms status? @see SmstatTypes
+ * @property {number} Smstat Sms type, see SmstatTypes
  * @property {number} Index
  * @property {string|number} Phone The phone number from which the SMS was sent
  * @property {string} Content The actual content of the SMS
@@ -229,6 +229,7 @@ export const SmstatTypes = {
  * @property {number} SaveType
  * @property {number} Priority
  * @property {number} SmsType
+ * @see SmstatTypes
  */
 
 // TODO: Fix SmsBoxTypes JSDoc

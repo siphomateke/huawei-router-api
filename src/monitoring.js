@@ -264,15 +264,16 @@ export const roamingStatuses = {
 };
 
 /**
+ * FIXME: Change 'see x' to proper JSDoc links
  * @typedef Status
- * @property {number} ConnectionStatus {@link connectionStatuses}
+ * @property {number} ConnectionStatus see connectionStatuses
  * @property {number} WifiConnectionStatus
  * @property {string} SignalStrength
  * @property {number} SignalIcon
- * @property {number} CurrentNetworkType {@link networkTypes}
+ * @property {number} CurrentNetworkType see networkTypes
  * @property {number} CurrentServiceDomain
- * @property {number} RoamingStatus {@link roamingStatuses}
- * @property {number} BatteryStatus {@link batteryStatuses}
+ * @property {number} RoamingStatus see roamingStatuses
+ * @property {number} BatteryStatus see batteryStatuses
  * @property {string} BatteryLevel
  * @property {string} BatteryPercent
  * @property {number} simlockStatus
@@ -285,10 +286,10 @@ export const roamingStatuses = {
  * @property {number} CurrentWifiUser
  * @property {number} TotalWifiUser
  * @property {number} currenttotalwifiuser
- * @property {number} ServiceStatus {@link serviceStatuses}
- * @property {number} SimStatus {@link simStatuses}
- * @property {string} WifiStatus {@link wifiStatuses}
- * @property {number} CurrentNetworkTypeEx {@link networkTypes}
+ * @property {number} ServiceStatus see serviceStatuses
+ * @property {number} SimStatus see simStatuses
+ * @property {string} WifiStatus see wifiStatuses
+ * @property {number} CurrentNetworkTypeEx see networkTypes
  * @property {number} maxsignal
  * @property {string} wifiindooronly
  * @property {string} wififrequence
