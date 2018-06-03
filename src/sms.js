@@ -321,27 +321,35 @@ async function getFullSmsListRecursive(
   const currentList = await getSmsList(smsListOptions);
   page++;
 
+  let processedList = [];
   if (options.filter) {
-    list = list.concat(filterSmsList(options.filter, currentList));
+    processedList = filterSmsList(options.filter, currentList);
   } else {
-    list = list.concat(currentList);
+    processedList = currentList;
   }
+
+  const done = list.length;
+  const remaining = total - done;
+  processedList = processedList.slice(0, remaining);
+
+  list = list.concat(processedList);
 
   // If a minimum date is given and the order is descending
   // then we can be efficient and stop queries once the date is
   // larger than the minimum date
   if (options.filter && options.filter.minDate && smsListOptions.sortOrder === 'desc') {
-    const dateFilteredList = filterSmsList({minDate: options.filter.minDate}, currentList);
+    const dateFilteredList = filterSmsList({minDate: options.filter.minDate}, processedList);
     // If the date filtered list does not match the list then
     // this is the last page we should check as anything later
     // will be older than the minimum date
-    if (dateFilteredList.length !== currentList.length) {
+    if (dateFilteredList.length !== processedList.length) {
       return list;
     }
   }
 
   // If we have not reached the end of the messages
-  if (((page - 1) * perPage) < total) {
+  // and this isn't the last page
+  if (list.length < total && currentList.length > 0) {
     return getFullSmsListRecursive(
       options, smsListOptions, list, perPage, total, page);
   } else {
