@@ -275,7 +275,8 @@ export async function getSmsList(options) {
 
 /**
  * @typedef FilterSmsListOption
- * @property {number} minDate
+ * @property {number} [minDate]
+ * @property {boolean} [read]
  */
 
 /**
@@ -287,8 +288,13 @@ export async function getSmsList(options) {
 function filterSmsList(options, list) {
   const filteredList = [];
   for (const message of list) {
-    if (options && options.minDate) {
+    if (options && 'minDate' in options) {
       if (moment(message.Date).valueOf() > options.minDate) {
+        filteredList.push(message);
+      }
+    } else if (options && 'read' in options) {
+      const state = parseInt(message.Smstat, 10);
+      if ((options.read && state === 1) || (!options.read && state === 0)) {
         filteredList.push(message);
       }
     } else {
