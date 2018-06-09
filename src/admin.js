@@ -32,9 +32,10 @@ export async function isLoggedIn() {
 }
 
 export async function login() {
+  // This should be first so getLoginState can reuse the tokens
+  const tokens = await ajax.getTokens(true);
   const loginState = await getLoginState();
   const loginDetails = config.getLoginDetails();
-  const tokens = await ajax.getTokens(true);
   let processedPassword;
   if (tokens.length > 0 && loginState.password_type === 4) {
     processedPassword = utils.base64encode(utils.sha256(loginDetails.username +
