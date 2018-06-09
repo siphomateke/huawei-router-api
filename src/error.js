@@ -6,6 +6,9 @@ export class RouterError extends ExtendableError {
     super(typeof message !== 'undefined' ? message : code);
     this.code = code;
   }
+  toString() {
+    return `${this.code}: ${this.message}`;
+  }
 }
 
 export class RouterApiError extends RouterError {
