@@ -96,12 +96,11 @@ export async function xmlRequest(options) {
 
 /**
  * Gets verification tokens required for making admin requests and logging in
+ * @param {string} url
  * @return {Promise<string[]>}
  */
-export async function getTokensFromPage() {
-  const {body} = await request({
-    url: config.getParsedUrl().origin+'/'+'html/home.html',
-  });
+export async function getTokensFromPage(url) {
+  const {body} = await request({url});
   const doc = (new JSDOM(body)).window.document;
   const meta = doc.querySelectorAll('meta[name=csrf_token]');
   let requestVerificationTokens = [];

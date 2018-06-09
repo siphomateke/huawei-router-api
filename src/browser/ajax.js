@@ -146,10 +146,11 @@ async function getPage(url) {
 
 /**
  * Gets verification tokens required for making admin requests and logging in
+ * @param {string} url
  * @return {Promise<string[]>}
  */
-export async function getTokensFromPage() {
-  const doc = await getPage(config.getParsedUrl().origin+'/'+'html/home.html');
+export async function getTokensFromPage(url) {
+  const doc = await getPage(url);
   const meta = doc.querySelectorAll('meta[name=csrf_token]');
   let requestVerificationTokens = [];
   for (let i=0; i < meta.length; i++) {

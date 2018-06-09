@@ -93,7 +93,8 @@ export let tokens = null;
  * @return {Promise<string[]>}
  */
 async function getRequestVerificationTokens() {
-  const tokens = await getTokensFromPage();
+  const homeUrl = config.getParsedUrl().origin+'/'+'html/home.html';
+  const tokens = await getTokensFromPage(homeUrl);
   if (tokens.length > 0) {
     return tokens;
   } else {
