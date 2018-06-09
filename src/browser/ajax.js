@@ -2,12 +2,6 @@
 import {
   RequestError,
 } from '@/error';
-import * as utils from '@/utils';
-import config from '@/config';
-import {
-  processXmlResponse,
-  doRSAEncrypt,
-} from '@/common/ajax';
 import jxon from 'jxon';
 
 /**
