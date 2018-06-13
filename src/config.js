@@ -24,10 +24,8 @@ class ApiConfig {
     let processed = data;
     if (this.options.map) {
       processed = {};
-      for (const key in data) {
-        if (Object.prototype.hasOwnProperty.call(data, key)) {
-          processed[key] = this.options.map(data[key]);
-        }
+      for (const key of Object.keys(data)) {
+        processed[key] = this.options.map(data[key]);
       }
     }
     if (this.options.converter) {
@@ -44,13 +42,11 @@ let apiConfigs = {
   sms: new ApiConfig('config/sms/config.xml', {
     converter: data => {
       const processed = {};
-      for (const key in data) {
-        if (Object.prototype.hasOwnProperty.call(data, key)) {
-          if (key.toLowerCase() !== 'cbschannellist') {
-            processed[key] = parseInt(data[key], 10);
-          } else {
-            processed[key] = data[key];
-          }
+      for (const key of Object.keys(data)) {
+        if (key.toLowerCase() !== 'cbschannellist') {
+          processed[key] = parseInt(data[key], 10);
+        } else {
+          processed[key] = data[key];
         }
       }
       return processed;
@@ -82,31 +78,29 @@ let apiConfigs = {
       converter: data => {
         let profiles = [];
         // TODO: Make sure this doesn't break when there is more than one profile
-        for (const key in data.Profiles) {
-          if (data.Profiles.hasOwnProperty(key)) {
-            const profile = data.Profiles[key];
-            profiles.push({
-              Index: parseInt(profile.Index, 10),
-              IsValid: profile.IsValid === '1',
-              Name: profile.Name,
-              ApnIsStatic: profile.ApnIsStatic === '1',
-              ApnName: profile.ApnName,
-              DialupNum: profile.DialupNum,
-              Username: profile.Username,
-              Password: profile.Password,
-              AuthMode: parseInt(profile.AuthMode, 10),
-              IpIsStatic: profile.IpIsStatic === '1',
-              IpAddress: profile.IpAddress,
-              Ipv6Address: profile.Ipv6Address,
-              DnsIsStatic: profile.DnsIsStatic === '1',
-              PrimaryDns: profile.PrimaryDns,
-              SecondaryDns: profile.SecondaryDns,
-              PrimaryIpv6Dns: profile.PrimaryIpv6Dns,
-              SecondaryIpv6Dns: profile.SecondaryIpv6Dns,
-              ReadOnly: parseInt(profile.ReadOnly, 10),
-              iptype: parseInt(profile.iptype, 10),
-            });
-          }
+        for (const key of Object.keys(data.Profiles)) {
+          const profile = data.Profiles[key];
+          profiles.push({
+            Index: parseInt(profile.Index, 10),
+            IsValid: profile.IsValid === '1',
+            Name: profile.Name,
+            ApnIsStatic: profile.ApnIsStatic === '1',
+            ApnName: profile.ApnName,
+            DialupNum: profile.DialupNum,
+            Username: profile.Username,
+            Password: profile.Password,
+            AuthMode: parseInt(profile.AuthMode, 10),
+            IpIsStatic: profile.IpIsStatic === '1',
+            IpAddress: profile.IpAddress,
+            Ipv6Address: profile.Ipv6Address,
+            DnsIsStatic: profile.DnsIsStatic === '1',
+            PrimaryDns: profile.PrimaryDns,
+            SecondaryDns: profile.SecondaryDns,
+            PrimaryIpv6Dns: profile.PrimaryIpv6Dns,
+            SecondaryIpv6Dns: profile.SecondaryIpv6Dns,
+            ReadOnly: parseInt(profile.ReadOnly, 10),
+            iptype: parseInt(profile.iptype, 10),
+          });
         }
         return {
           CurrentProfile: parseInt(data.CurrentProfile, 10),

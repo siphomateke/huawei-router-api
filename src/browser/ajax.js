@@ -38,10 +38,8 @@ function xhrRequest(options) {
       xhr.overrideMimeType(options.mimeType);
     }
     if (options.requestHeaders) {
-      for (const header in options.requestHeaders) {
-        if (Object.prototype.hasOwnProperty.call(options.requestHeaders, header)) {
-          xhr.setRequestHeader(header, options.requestHeaders[header]);
-        }
+      for (const header of Object.keys(options.requestHeaders)) {
+        xhr.setRequestHeader(header, options.requestHeaders[header]);
       }
     }
     xhr.onload = () => {

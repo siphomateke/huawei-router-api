@@ -30,10 +30,8 @@ function convertResponse(response, options) {
   let processed = response;
   if (options.map) {
     processed = {};
-    for (const key in response) {
-      if (Object.prototype.hasOwnProperty.call(response, key)) {
-        processed[key] = options.map(response[key]);
-      }
+    for (const key of Object.keys(response)) {
+      processed[key] = options.map(response[key]);
     }
   }
   if (options.converter) {
@@ -131,10 +129,8 @@ export function updateTokens(newTokens) {
  */
 function headersToLowerCase(headers) {
   let lowerCaseHeaders = {};
-  for (let header in headers) {
-    if (headers.hasOwnProperty(header)) {
-      lowerCaseHeaders[header.toLowerCase()] = headers[header];
-    }
+  for (let header of Object.keys(headers)) {
+    lowerCaseHeaders[header.toLowerCase()] = headers[header];
   }
   return lowerCaseHeaders;
 }

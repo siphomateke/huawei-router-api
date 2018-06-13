@@ -323,7 +323,7 @@ export async function getStatus() {
     'CurrentNetworkTypeEx',
     'maxsignal',
   ];
-  for (const key in data) {
+  for (const key of Object.keys(data)) {
     if (numbers.includes(key)) {
       data[key] = parseInt(data[key], 10);
     }

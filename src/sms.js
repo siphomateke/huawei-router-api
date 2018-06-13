@@ -189,10 +189,8 @@ export function parse(message) {
 export async function getSmsCount(includeComputed=true) {
   const data = await ajax.getAjaxData({url: 'api/sms/sms-count'});
   const processed = {};
-  for (const key in data) {
-    if (data.hasOwnProperty(key)) {
-      processed[key] = parseInt(data[key], 10);
-    }
+  for (const key of Object.keys(data)) {
+    processed[key] = parseInt(data[key], 10);
   }
   if (includeComputed) {
     let simTotal;
