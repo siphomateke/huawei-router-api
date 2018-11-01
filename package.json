@@ -1,6 +1,6 @@
 {
   "name": "huawei-router-api",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "An API for querying Huawei routers",
   "main": "dist/index.cjs.js",
   "module": "dist/index.es.js",
