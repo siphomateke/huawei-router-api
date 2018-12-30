@@ -403,6 +403,12 @@ export function setSmsAsRead(idx) {
   });
 }
 
+/**
+ * @typedef CreateSmsRequestOptions
+ * @property {number} index The index of the message. Only used for sending drafts
+ * @property {string[]} numbers An array of numbers to send the sms to
+ * @property {string} content The SMS body
+ */
 export function createSmsRequest(options) {
   options = Object.assign({
     index: -1,
@@ -429,7 +435,7 @@ export function createSmsRequest(options) {
 
 /**
  * @typedef SaveSmsOptions
- * @property {number} index The index of the  Only used for sending drafts
+ * @property {number} index The index of the messsage. Only used for sending drafts
  * @property {string[]} numbers An array of numbers to send the sms to
  * @property {string} content The SMS body
  */
