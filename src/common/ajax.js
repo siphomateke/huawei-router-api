@@ -41,6 +41,9 @@ export async function request(options) {
       withCredentials: true,
       jar,
       timeout: config.requestTimeout,
+      validateStatus: function (status) {
+        return status >= 200 && status < 400;
+      },
       ...options,
     });
     return response;
