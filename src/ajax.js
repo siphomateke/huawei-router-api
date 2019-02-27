@@ -7,12 +7,10 @@ import {
   objectToXml,
   doRSAEncrypt,
   isAjaxReturnOk,
-} from '@/common/ajax';
-import {
-  xmlRequest,
-  getTokensFromPage,
   basicRequest,
-} from '$env/ajax';
+  xmlRequest,
+} from '@/common/ajax';
+import {getTokensFromPage} from '$env/ajax';
 
 /**
  * @typedef ResponseProcessorOptions
