@@ -180,6 +180,7 @@ const errors = {
   'http_request_invalid_xml': ['connection'],
   'http_request_invalid_status': ['connection'],
   'http_request_timeout': ['connection'],
+  'http_request_no_response': ['connection'],
   'xml_response_not_ok': [],
   'invalid_router_url': [],
   'ussd_timeout': ['ussd'],

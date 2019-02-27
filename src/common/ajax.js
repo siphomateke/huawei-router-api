@@ -36,15 +36,31 @@ export async function request(options) {
     }, options.headers);
   }
 
-  const response = await axios({
-    withCredentials: true,
-    jar,
-    ...options,
-  });
-  if (response.status >= 200 && response.status < 400) {
+  try {
+    const response = await axios({
+      withCredentials: true,
+      jar,
+      ...options,
+    });
     return response;
-  } else {
-    throw new RequestError('invalid_status', 'HTTP request response status invalid; '+response.statusMessage);
+  } catch (error) {
+    let requestErrorCode = '';
+    let requestErrorMessage = '';
+    if (error.response) {
+      requestErrorCode = 'invalid_status';
+      requestErrorMessage = 'HTTP request response status invalid; '+error.response.status;
+    } else if (error.request) {
+      requestErrorCode = 'no_response';
+      requestErrorMessage = 'HTTP request was made but no response was received.';
+    } else {
+      requestErrorCode = 'error';
+      requestErrorMessage = 'Unknown HTTP request error; '+error.message;
+    }
+    let axiosErrorCode = '';
+    if (error.code) {
+      requestErrorMessage += `; Error code: ${axiosErrorCode}.`;
+    }
+    throw new RequestError(requestErrorCode, requestErrorMessage);
   }
 }
 
