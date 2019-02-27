@@ -2,11 +2,15 @@
 import {
   RequestError,
 } from '@/error';
-import nodeRequest from 'request';
+import axios from 'axios';
+import axiosCookieJarSupport from 'axios-cookiejar-support';
+import {CookieJar} from 'tough-cookie';
 import jxon from 'jxon';
 import {JSDOM} from 'jsdom';
 
-const jar = nodeRequest.jar();
+const jar = new CookieJar();
+
+axiosCookieJarSupport(axios);
 
 /**
  * @typedef requestOptions
@@ -18,49 +22,35 @@ const jar = nodeRequest.jar();
  */
 
 /**
- * @typedef requestResponse
- * @property {nodeRequest.RequestResponse} response
- * @property {any} body
- */
-
-/**
  *
  * @param {requestOptions} options
- * @return {Promise<requestResponse>}
+ * @return {Promise<import('axios').AxiosResponse>}
  */
-function request(options) {
+async function request(options) {
   options = Object.assign({
     method: 'GET',
   }, options);
-  options.headers = Object.assign({
-    'Accept': options.accepts,
-  }, options.headers);
-  return new Promise((resolve, reject) => {
-    return nodeRequest({
-      url: options.url,
-      method: options.method,
-      headers: options.headers,
-      body: options.data,
-      jar: jar,
-    }, (error, response, body) => {
-      if (error) {
-        reject(error);
-      } else if (response) {
-        if (response.statusCode >= 200 && response.statusCode < 400) {
-          resolve({response, body});
-        } else {
-          reject(new RequestError('invalid_status', 'HTTP request response status invalid; '+response.statusMessage));
-        }
-      } else {
-        reject(new RequestError('error', 'Unknown HTTP request error.'));
-      }
-    });
+  if (options.accepts) {
+    options.headers = Object.assign({
+      'Accept': options.accepts,
+    }, options.headers);
+  }
+
+  const response = await axios({
+    withCredentials: true,
+    jar,
+    ...options,
   });
+  if (response.status >= 200 && response.status < 400) {
+    return response;
+  } else {
+    throw new RequestError('invalid_status', 'HTTP request response status invalid; '+response.statusMessage);
+  }
 }
 
 export async function basicRequest(url) {
-  const {body} = await request({url});
-  return body;
+  const {data} = await request({url});
+  return data;
 }
 
 /**
@@ -77,16 +67,12 @@ export async function basicRequest(url) {
  * @return {Promise<any>}
  */
 export async function xmlRequest(options) {
-  const requestOptions = {
-    url: options.url,
-    method: options.method,
-    data: options.data,
-    headers: options.headers,
+  const response = await request({
     accepts: 'application/xml',
-  };
-  const {response, body} = await request(requestOptions);
+    ...options,
+  });
   try {
-    const data = jxon.stringToJs(body);
+    const data = jxon.stringToJs(response.data);
     return {data, headers: response.headers};
   } catch (e) {
     throw new RequestError('invalid_xml', e);
@@ -99,8 +85,8 @@ export async function xmlRequest(options) {
  * @return {Promise<string[]>}
  */
 export async function getTokensFromPage(url) {
-  const {body} = await request({url});
-  const doc = (new JSDOM(body)).window.document;
+  const {data} = await request({url});
+  const doc = (new JSDOM(data)).window.document;
   const meta = doc.querySelectorAll('meta[name=csrf_token]');
   let requestVerificationTokens = [];
   for (let i=0; i < meta.length; i++) {

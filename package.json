@@ -29,6 +29,8 @@
   },
   "homepage": "https://github.com/nextgensparx/huawei-router-api#readme",
   "dependencies": {
+    "axios": "^0.18.0",
+    "axios-cookiejar-support": "^0.4.2",
     "babel-runtime": "^6.26.0",
     "dotty": "^0.1.0",
     "es6-error": "^4.1.1",
@@ -37,12 +39,14 @@
     "moment": "^2.22.1",
     "node-rsa": "^0.4.2",
     "promise.prototype.finally": "^3.1.0",
-    "request": "^2.85.0",
-    "sha.js": "^2.4.11"
+    "sha.js": "^2.4.11",
+    "tough-cookie": "^3.0.1"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-plugin-external-helpers": "^6.22.0",
+    "babel-plugin-syntax-object-rest-spread": "^6.13.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.7.0",
     "concurrently": "^3.5.1",

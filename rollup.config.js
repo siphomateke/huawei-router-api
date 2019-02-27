@@ -10,6 +10,11 @@ function resolve(dir) {
 
 const formats = ['cjs', 'es'];
 
+const babelPlugins = [
+  'syntax-object-rest-spread',
+  'transform-object-rest-spread'
+];
+
 const builds = {
   'web': {
     outputFile: 'browser',
@@ -30,6 +35,7 @@ const builds = {
             'polyfill': false,
             'regenerator': true,
           }],
+          ...babelPlugins
         ],
         runtimeHelpers: true,
       }),
@@ -48,6 +54,7 @@ const builds = {
         ],
         plugins: [
           'external-helpers',
+          ...babelPlugins,
         ],
       }),
     ],
