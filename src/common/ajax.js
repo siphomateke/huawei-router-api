@@ -2,7 +2,7 @@
 import {RouterError, throwApiError, RequestError} from '@/error';
 import config from '@/config';
 import NodeRSA from 'node-rsa';
-import jxon from 'jxon';
+import xml2js from 'xml2js';
 import axios from 'axios';
 import axiosCookieJarSupport from 'axios-cookiejar-support';
 import {CookieJar} from 'tough-cookie';
@@ -83,6 +83,24 @@ export async function basicRequest(url) {
  * @property {Object.<string, string>} [headers]
  */
 
+const xmlParser = new xml2js.Parser({explicitArray: false});
+
+/**
+ * Converts an XML string to JSON
+ * @param {string} str
+ * @returns {Promise<Object>}
+ */
+async function parseXml(str) {
+  return new Promise((resolve, reject) => {
+    xmlParser.parseString(str, (err, result) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(result);
+    })
+  })
+}
+
 /**
  *
  * @param {xmlRequestOptions} options
@@ -94,7 +112,7 @@ export async function xmlRequest(options) {
     ...options,
   });
   try {
-    const data = jxon.stringToJs(response.data);
+    const data = await parseXml(response.data);
     return {data, headers: response.headers};
   } catch (e) {
     throw new RequestError('invalid_xml', e);
@@ -149,11 +167,15 @@ export async function doRSAEncrypt(str) {
   return key.encrypt(str, 'hex');
 }
 
+const xmlBuilder = new xml2js.Builder({
+  renderOpts: {pretty: false}
+});
+
 /**
  *
  * @param {object} obj
  * @return {string}
  */
 export function objectToXml(obj) {
-  return '<?xml version="1.0" encoding="UTF-8"?>'+jxon.jsToString(obj);
+  return xmlBuilder.buildObject(obj);
 }
