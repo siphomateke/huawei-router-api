@@ -40,6 +40,7 @@ export async function request(options) {
     const response = await axios({
       withCredentials: true,
       jar,
+      timeout: config.requestTimeout,
       ...options,
     });
     return response;
@@ -47,8 +48,13 @@ export async function request(options) {
     let requestErrorCode = '';
     let requestErrorMessage = '';
     if (error.response) {
-      requestErrorCode = 'invalid_status';
-      requestErrorMessage = 'HTTP request response status invalid; '+error.response.status;
+      if (error.response.status === 408 || error.code === 'ECONNABORTED') {
+        requestErrorCode = 'timeout';
+        requestErrorMessage = 'HTTP request timed out.';
+      } else {
+        requestErrorCode = 'invalid_status';
+        requestErrorMessage = 'HTTP request response status invalid; '+error.response.status;
+      }
     } else if (error.request) {
       requestErrorCode = 'no_response';
       requestErrorMessage = 'HTTP request was made but no response was received.';

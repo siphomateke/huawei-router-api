@@ -302,6 +302,7 @@ export default {
   parsedUrl: null,
   ussdWaitInterval: 1000,
   ussdTimeout: 20000,
+  requestTimeout: 10000, // 10s
   api: {
     /** @type {ConfigModuleSwitch} */
     module: null,
