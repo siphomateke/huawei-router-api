@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/nextgensparx/huawei-router-api.git"
+    "url": "git+ssh://git@github.com/siphomateke/huawei-router-api.git"
   },
   "keywords": [
     "api",
@@ -22,12 +22,12 @@
     "huawei",
     "b315"
   ],
-  "author": "nextgensparx <siphomateke@gmail.com>",
+  "author": "siphomateke <siphomateke@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/nextgensparx/huawei-router-api/issues"
+    "url": "https://github.com/siphomateke/huawei-router-api/issues"
   },
-  "homepage": "https://github.com/nextgensparx/huawei-router-api#readme",
+  "homepage": "https://github.com/siphomateke/huawei-router-api#readme",
   "dependencies": {
     "axios": "^0.18.0",
     "axios-cookiejar-support": "^0.4.2",
