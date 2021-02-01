@@ -3,42 +3,26 @@ import * as ajax from '@/ajax';
 import * as utils from '@/utils';
 import dotty from 'dotty';
 
-class ApiConfig {
-  /**
-   * @typedef ApiConfigOptions
-   * @property {function} [map]
-   * @property {function} [converter]
-   */
+interface ApiConfigOptions extends ajax.ResponseProcessorOptions {}
 
-  /**
-   * @param {string} url
-   * @param {ApiConfigOptions} options
-   */
-  constructor(url, options={}) {
-    this.url = url;
-    this.options = options;
-  }
+class ApiConfig {
+  constructor(public url: string, public options: ApiConfigOptions = {}) {}
 
   async get() {
-    const data = await ajax.getAjaxData({url: this.url});
-    let processed = data;
-    if (this.options.map) {
-      processed = {};
-      for (const key of Object.keys(data)) {
-        processed[key] = this.options.map(data[key]);
-      }
-    }
-    if (this.options.converter) {
-      processed = this.options.converter(processed);
-    }
-    return processed;
+    const data = await ajax.getAjaxData({ url: this.url });
+    return ajax.convertResponse(data, this.options);
   }
 }
 
 // TODO: Add config checks and throw errors
 
-let apiConfigs = {
-  module: new ApiConfig('api/global/module-switch', {map: item => item === '1'}),
+interface ApiConfigs {
+  [key: string]: ApiConfigs | ApiConfig;
+}
+
+// FIXME: Make these type-safe
+let apiConfigs: ApiConfigs = {
+  module: new ApiConfig('api/global/module-switch', { map: item => item === '1' }),
   sms: new ApiConfig('config/sms/config.xml', {
     converter: data => {
       const processed = {};
@@ -58,7 +42,7 @@ let apiConfigs = {
   },
   enc: new ApiConfig('api/webserver/publickey', {
     converter: data => {
-      return {publicKey: {n: data.encpubkeyn, e: data.encpubkeye}};
+      return { publicKey: { n: data.encpubkeyn, e: data.encpubkeye } };
     },
   }),
   dialup: {
@@ -134,283 +118,278 @@ These were missing from ConfigModuleSwitch when testing:
 'voip_adcance_enable': voiceadvancesetting === '1',
 */
 
-/**
- * @typedef ConfigModuleSwitch
- * @property {boolean} ussd_enabled
- * @property {boolean} bbou_enabled
- * @property {boolean} sms_enabled
- * @property {boolean} sdcard_enabled
- * @property {boolean} wifi_enabled
- * @property {boolean} statistic_enabled
- * @property {boolean} help_enabled
- * @property {boolean} stk_enabled
- * @property {boolean} pb_enabled
- * @property {boolean} dlna_enabled
- * @property {boolean} ota_enabled
- * @property {boolean} wifioffload_enabled
- * @property {boolean} cradle_enabled
- * @property {boolean} multssid_enable
- * @property {boolean} ipv6_enabled
- * @property {boolean} monthly_volume_enabled
- * @property {boolean} powersave_enabled
- * @property {boolean} sntp_enabled
- * @property {boolean} encrypt_enabled
- * @property {boolean} dataswitch_enabled
- * @property {boolean} ddns_enabled
- * @property {boolean} sambashare_enabled
- * @property {boolean} poweroff_enabled
- * @property {boolean} fw_macfilter_enabled
- * @property {boolean} ecomode_enabled
- * @property {boolean} zonetime_enabled
- * @property {boolean} diagnosis_enabled
- * @property {boolean} localupdate_enabled
- * @property {boolean} cbs_enabled
- * @property {boolean} voip_enabled
- * @property {boolean} qrcode_enabled
- * @property {boolean} charger_enbaled
- * @property {boolean} vpn_enabled
- * @property {boolean} cs_enable
- * @property {boolean} tr069_enabled
- * @property {boolean} antenna_enabled
- * @property {boolean} aclui_enabled
- * @property {boolean} static_route_enabled
- * @property {boolean} static_route6_enabled
- * @property {boolean} loginusername_enable
- */
+interface ConfigModuleSwitch {
+  ussd_enabled: boolean;
+  bbou_enabled: boolean;
+  sms_enabled: boolean;
+  sdcard_enabled: boolean;
+  wifi_enabled: boolean;
+  statistic_enabled: boolean;
+  help_enabled: boolean;
+  stk_enabled: boolean;
+  pb_enabled: boolean;
+  dlna_enabled: boolean;
+  ota_enabled: boolean;
+  wifioffload_enabled: boolean;
+  cradle_enabled: boolean;
+  multssid_enable: boolean;
+  ipv6_enabled: boolean;
+  monthly_volume_enabled: boolean;
+  powersave_enabled: boolean;
+  sntp_enabled: boolean;
+  encrypt_enabled: boolean;
+  dataswitch_enabled: boolean;
+  ddns_enabled: boolean;
+  sambashare_enabled: boolean;
+  poweroff_enabled: boolean;
+  fw_macfilter_enabled: boolean;
+  ecomode_enabled: boolean;
+  zonetime_enabled: boolean;
+  diagnosis_enabled: boolean;
+  localupdate_enabled: boolean;
+  cbs_enabled: boolean;
+  voip_enabled: boolean;
+  qrcode_enabled: boolean;
+  charger_enbaled: boolean;
+  vpn_enabled: boolean;
+  cs_enable: boolean;
+  tr069_enabled: boolean;
+  antenna_enabled: boolean;
+  aclui_enabled: boolean;
+  static_route_enabled: boolean;
+  static_route6_enabled: boolean;
+  loginusername_enable: boolean;
+}
 
-/**
- * @typedef PublicKey
- * @property {string} n
- * @property {string} e
- */
-
-/**
- * @typedef EncryptionConfig
- * @property {PublicKey} publicKey Public RSA keys
- */
+interface PublicKey {
+  n: string;
+  e: string;
+}
 
 // TODO: Investigate what cbschannellist contains in SmsConfig. It's probably an array
-/**
- * @typedef SmsConfig
- * @property {any} cbschannellist
- * @property {number} cbsenable
- * @property {number} cdma_enabled
- * @property {number} enable
- * @property {number} getcontactenable
- * @property {number} import_enabled
- * @property {number} localmax
- * @property {number} maxphone
- * @property {number} pagesize
- * @property {number} session_sms_enabled
- * @property {number} sms_center_enabled
- * @property {number} sms_priority_enabled
- * @property {number} sms_validity_enabled
- * @property {number} smscharlang
- * @property {number} smscharmap
- * @property {number} smsfulltype
- * @property {number} url_enabled
- * @property {number} validity
- */
+interface SmsConfig {
+  cbschannellist: any;
+  cbsenable: number;
+  cdma_enabled: number;
+  enable: number;
+  getcontactenable: number;
+  import_enabled: number;
+  localmax: number;
+  maxphone: number;
+  pagesize: number;
+  session_sms_enabled: number;
+  sms_center_enabled: number;
+  sms_priority_enabled: number;
+  sms_validity_enabled: number;
+  smscharlang: number;
+  smscharmap: number;
+  smsfulltype: number;
+  url_enabled: number;
+  validity: number;
+}
 
-/**
- * @typedef UssdConfigMenuItem
- * @property {string} Name
- * @property {string} Command
- */
+interface UssdConfigMenuItem {
+  Name: string;
+  Command: string;
+}
 
-/**
- * @typedef UssdConfigMenu
- * @property {UssdConfigMenuItem[]} MenuItem
- */
+interface UssdConfigMenu {
+  MenuItem: UssdConfigMenuItem[];
+}
 
-/**
- * @typedef UssdConfigGeneral
- * @property {string} Action
- * @property {string} Description
- * @property {string} LimitText
- * @property {UssdConfigMenu} Menu
- * @property {string} Title
- */
+interface UssdConfigGeneral {
+  Action: string;
+  Description: string;
+  LimitText: string;
+  Menu: UssdConfigMenu;
+  Title: string;
+}
 
-/**
- * @typedef UssdConfig
- * @property {UssdConfigGeneral} General
- */
+interface UssdConfig {
+  General: UssdConfigGeneral;
+}
 
-/**
- * @typedef DialupProfile
- * @property {number} Index 1
- * @property {boolean} IsValid 1
- * @property {string} Name PLAY
- * @property {boolean} ApnIsStatic 1
- * @property {string} ApnName internet
- * @property {string} DialupNum *99#
- * @property {string} Username
- * @property {string} Password
- * @property {number} AuthMode 2
- * @property {boolean} IpIsStatic 0
- * @property {string} IpAddress
- * @property {string} Ipv6Address
- * @property {boolean} DnsIsStatic 0
- * @property {string} PrimaryDns
- * @property {string} SecondaryDns
- * @property {string} PrimaryIpv6Dns
- * @property {string} SecondaryIpv6Dns
- * @property {number} ReadOnly 2
- * @property {number} iptype 2
- */
+interface DialupProfile {
+  /** E.g. 1 */
+  Index: number;
+  IsValid: boolean;
+  Name: 'PLAY' | string;
+  ApnIsStatic: boolean;
+  /** E.g. internet */
+  ApnName: string
+  /** E.g. *99# */
+  DialupNum: string;
+  Username: string;
+  Password: string;
+  /** E.g. 2 */
+  AuthMode: number;
+  IpIsStatic: boolean;
+  IpAddress: string;
+  Ipv6Address: string;
+  DnsIsStatic: boolean;
+  PrimaryDns: string;
+  SecondaryDns: string;
+  PrimaryIpv6Dns: string;
+  SecondaryIpv6Dns: string;
+  /** E.g. 2 */
+  ReadOnly: number;
+  /** E.g. 2 */
+  iptype: number;
+}
 
-/**
- * @typedef DialupProfiles
- * @property {number} CurrentProfile
- * @property {DialupProfile[]} Profiles
- */
+interface DialupProfiles {
+  CurrentProfile: number;
+  Profiles: DialupProfile[];
+}
 
-/**
- * @typedef DialupConnection
- * @property {boolean} RoamAutoConnectEnable
- * @property {number} MaxIdelTime e.g 600
- * @property {0|1|2} ConnectMode 0-auto, 1-manual, 2-combining on demand
- * @property {number} MTU e.g 1500, 1450
- * @property {boolean} auto_dial_switch
- * @property {boolean} pdp_always_on
- */
+interface DialupConnection {
+  RoamAutoConnectEnable: boolean;
+  /** e.g 600 */
+  MaxIdelTime: number;
+  /** 0-auto, 1-manual, 2-combining on demand */
+  ConnectMode: 0 | 1 | 2;
+  /** e.g 1500, 1450 */
+  MTU: number;
+  auto_dial_switch: boolean;
+  pdp_always_on: boolean;
+}
 
-/**
- * @typedef DialupFeatureSwitch
- * @property {boolean} iptype_enabled
- * @property {boolean} auto_dial_enabled
- * @property {boolean} show_dns_setting
- */
+interface DialupFeatureSwitch {
+  iptype_enabled: boolean;
+  auto_dial_enabled: boolean;
+  show_dns_setting: boolean;
+}
 
-/**
- * @typedef ConnectMode
- * @property {boolean} Auto
- * @property {boolean} Manual
- */
+interface ConnectMode {
+  Auto: boolean;
+  Manual: boolean;
+}
 
-/**
- * @typedef ConnectModeConfig
- * @property {ConnectMode} ConnectMode
- * @property {number} idle_time_enabled
- */
+interface ConnectModeConfig {
+  ConnectMode: ConnectMode;
+  idle_time_enabled: number;
+}
 
-export default {
-  username: null,
-  password: null,
-  url: null,
-  parsedUrl: null,
-  ussdWaitInterval: 1000,
-  ussdTimeout: 20000,
-  requestTimeout: 10000, // 10s
-  api: {
-    /** @type {ConfigModuleSwitch} */
+interface ConfigApiStore {
+  module: ConfigModuleSwitch | null;
+  encryption: {
+    /** Public RSA keys */
+    publicKey: PublicKey | null;
+  };
+  sms: SmsConfig | null;
+  ussd: {
+    prepaid: UssdConfig | null;
+    postpaid: UssdConfig | null;
+  };
+  dialup: {
+    connection: DialupConnection | null;
+    profiles: DialupProfiles | null;
+    featureSwitch: DialupFeatureSwitch | null;
+    connectMode: ConnectModeConfig | null;
+  };
+}
+
+// TODO: Convert to class
+class Config {
+  username: string | null = null;
+  password: string | null = null;
+  url: string | null = null;
+  parsedUrl: URL | null = null;
+  ussdWaitInterval: number = 1000;
+  ussdTimeout: number = 20000;
+  requestTimeout: number = 10000; // 10s
+  api: ConfigApiStore = {
     module: null,
-    /** @type {EncryptionConfig} */
     encryption: {
       publicKey: null,
     },
-    /** @type {SmsConfig} */
     sms: null,
     ussd: {
-      /** @type {UssdConfig} */
       prepaid: null,
-      /** @type {UssdConfig} */
       postpaid: null,
     },
     dialup: {
-      /** @type {DialupConnection} */
       connection: null,
-      /** @type {DialupProfiles} */
       profiles: null,
-      /** @type {DialupFeatureSwitch} */
       featureSwitch: null,
-      /** @type {ConnectModeConfig} */
       connectMode: null,
     },
-  },
+  }
 
-  setUrl(_url) {
+  setUrl(_url: string) {
     this.url = _url;
     this.parsedUrl = utils.parseRouterUrl(this.url);
-  },
+  }
 
-  setUsername(_username) {
+  setUsername(_username: string) {
     this.username = _username;
-  },
+  }
 
-  setPassword(_password) {
+  setPassword(_password: string) {
     this.password = _password;
-  },
+  }
 
   getUsername() {
     return this.username;
-  },
+  }
 
   getPassword() {
     return this.password;
-  },
+  }
 
   getLoginDetails() {
     return {
       username: this.username,
       password: this.password,
     };
-  },
+  }
 
   getUrl() {
     return this.url;
-  },
+  }
 
   getParsedUrl() {
     return this.parsedUrl;
-  },
+  }
 
-  setConfig(path, value) {
+  setConfig(path: string, value: any) {
     dotty.put(this.api, path, value);
-  },
+  }
 
   /**
-   * @param {string} path The path of the config to retrieve. E.g. 'ussd.prepaid'
-   * @param {boolean} fresh Set to true to refresh cached values
-   * @return {Promise<any>}
+   * @param path The path of the config to retrieve. E.g. 'ussd.prepaid'
+   * @param fresh Set to true to refresh cached values
    */
-  async getConfig(path, fresh=false) {
+  // FIXME: Make this type-safe
+  async getConfig(path: string, fresh: boolean = false): Promise<any> {
     if (!dotty.exists(this.api, path) || dotty.get(this.api, path) === null || fresh) {
       this.setConfig(path, await dotty.get(apiConfigs, path).get());
     }
     return dotty.get(this.api, path);
-  },
+  }
 
-  /**
-   * @return {Promise<ConfigModuleSwitch>}
-   */
-  getModuleSwitch() {
+  getModuleSwitch(): Promise<ConfigModuleSwitch> {
     return this.getConfig('module');
-  },
+  }
 
-  /**
-   * @return {Promise<PublicKey>}
-   */
-  async getPublicEncryptionKey() {
+  async getPublicEncryptionKey(): Promise<PublicKey> {
     return (await this.getConfig('enc')).publicKey;
-  },
+  }
 
   /**
    * Get's SMS configuration
-   * @return {Promise<SmsConfig>}
    */
-  getSmsConfig() {
+  getSmsConfig(): Promise<SmsConfig> {
     return this.getConfig('sms');
-  },
+  }
 
   /**
    * Get's USSD configuration. Includes USSD commands.
-   * @param {boolean} [postpaid=false] Whether to get the postpaid or prepaid config
-   * @return {Promise<UssdConfig>}
+   * @param postpaid Whether to get the postpaid or prepaid config
    */
-  async getUssdConfig(postpaid=false) {
+  async getUssdConfig(postpaid: boolean = false): Promise<UssdConfig> {
     const paidType = postpaid ? 'postpaid' : 'prepaid';
-    return (await this.getConfig('ussd.'+paidType)).USSD;
-  },
+    return (await this.getConfig('ussd.' + paidType)).USSD;
+  }
 };
+export default new Config();

@@ -1,7 +1,7 @@
 'use strict';
 import * as utils from '@/utils';
 import config from '@/config';
-import {RouterError} from '@/error';
+import { RouterError } from '@/error';
 import {
   processXmlResponse,
   objectToXml,
@@ -9,58 +9,80 @@ import {
   isAjaxReturnOk,
   basicRequest,
   xmlRequest,
+  RequestHeaders,
+  AjaxOkResponse,
 } from '@/common/ajax';
-import {getTokensFromPage} from '$env/ajax';
+import { getTokensFromPage } from '$env/ajax';
 
-/**
- * @typedef ResponseProcessorOptions
- * @property {function} [map]
- * @property {function} [converter]
- */
+type ConvertResponseFnResponseType = { [key: string]: any };
+type ConverterFunction<R extends ConvertResponseFnResponseType, T> = (response: R) => T;
+type MapFunction<R extends ConvertResponseFnResponseType, T> = (item: R[keyof R]) => T;
+
+export interface ResponseProcessorOptions<
+  Response,
+  ConverterReturn,
+  Converter extends ConverterFunction<Response, ConverterReturn>,
+  MapperReturn,
+  MapFn extends MapFunction<Response, MapperReturn>,
+  > {
+  map?: MapFn,
+  converter?: Converter,
+}
 
 /**
  * Applies common conversions to AJAX responses
- * @param {object} response
- * @param {ResponseProcessorOptions} options
- * @return {object}
  */
-function convertResponse(response, options) {
-  let processed = response;
-  if (options.map) {
-    processed = {};
+// FIXME: Make the typings in this better
+export function convertResponse<
+  R extends ConvertResponseFnResponseType,
+  ConverterFnReturn,
+  ConverterFn,
+  MapFnReturn,
+  MapFn extends MapFunction<R, MapFnReturn>,
+  T extends (ConverterFn extends undefined ? { [key in keyof R]: MapFnReturn } : ConverterFnReturn)
+>(response: R, options: ResponseProcessorOptions<R, ConverterFnReturn, ConverterFn, MapFnReturn, MapFn>): T {
+  let processed: T | R = response;
+  if (typeof options.map !== 'undefined') {
+    processed = {} as R;
     for (const key of Object.keys(response)) {
       processed[key] = options.map(response[key]);
     }
   }
-  if (options.converter) {
+  if (typeof options.converter !== 'undefined') {
     processed = options.converter(processed);
   }
   return processed;
 }
 
-/**
- * @typedef GetAjaxDataOptions
- * @property {string} url The url to get ajax data from
- * @property {boolean} [responseMustBeOk]
- * @property {string} [routerUrl] The url of the router. E.g. http://192.168.8.1
- * @property {function} [converter]
- * @property {function} [map]
- */
+const converted = convertResponse({ username: 'thomas', password: '12345678' }, {
+  converter: response => response.username === 'thomas',
+});
 
-/**
- *
- * @param {GetAjaxDataOptions} options
- * @return {Promise<any>}
- */
-export async function getAjaxData(options) {
-  let parsedUrl;
+interface GetAjaxDataOptions<CR, C extends ConverterFunction<CR>> extends ResponseProcessorOptions<CR, C> {
+  /** The url to get ajax data from */
+  url: string;
+  responseMustBeOk?: boolean;
+  /** The url of the router.E.g.http://192.168.8.1 */
+  routerUrl?: string;
+}
+
+interface DefaultAjaxHeaders extends RequestHeaders {
+  __RequestVerificationToken?: string,
+}
+
+export async function getAjaxData<
+  CR,
+  C extends ConverterFunction<CR>,
+  T extends (C extends undefined ? object : CR)
+>(options: GetAjaxDataOptions<CR, C>): Promise<T> {
+  let parsedUrl: URL;
   if (options.routerUrl) {
     parsedUrl = utils.parseRouterUrl(options.routerUrl);
   } else {
     parsedUrl = config.getParsedUrl();
   }
   const _tokens = await getTokens();
-  const headers = {};
+  const headers: DefaultAjaxHeaders = {};
   if (_tokens.length > 0) {
     headers['__RequestVerificationToken'] = _tokens[0];
   }
@@ -81,20 +103,22 @@ export async function getAjaxData(options) {
   }
 }
 
+export type VerificationToken = string;
+
 // TODO: Improve token storage
-export let tokens = null;
+export let tokens: VerificationToken[] | null = null;
 
 /**
  * Gets verification tokens required for making admin requests and logging in
- * @return {Promise<string[]>}
+ * @return The verification tokens
  */
-async function getRequestVerificationTokens() {
-  const homeUrl = config.getParsedUrl().origin+'/'+'html/home.html';
+async function getRequestVerificationTokens(): Promise<VerificationToken[]> {
+  const homeUrl = config.getParsedUrl().origin + '/' + 'html/home.html';
   const tokens = await getTokensFromPage(homeUrl);
   if (tokens.length > 0) {
     return tokens;
   } else {
-    const data = await getAjaxData({url: 'api/webserver/token'});
+    const data = await getAjaxData({ url: 'api/webserver/token' });
     return [data.token];
   }
 }
@@ -106,27 +130,29 @@ export async function refreshTokens() {
 
 /**
  *
- * @param {boolean} fresh Set to true to force getting new tokens instead of using cached ones
- * @return {Promise<string[]>}
+ * @param fresh Set to true to force getting new tokens instead of using cached ones
  */
-export async function getTokens(fresh=false) {
+export async function getTokens(fresh: boolean = false): Promise<VerificationToken[]> {
   if (!tokens || fresh) {
     await refreshTokens();
   }
-  return tokens;
+  if (tokens !== null) {
+    return tokens;
+  } else {
+    // FIXME: Make this a proper error
+    throw new Error('Login verification tokens missing');
+  }
 }
 
-export function updateTokens(newTokens) {
+export function updateTokens(newTokens: VerificationToken[]) {
   tokens = newTokens;
 }
 
 /**
  * Converts headers keys to lower case
- * @param {Object.<string, string>} headers
- * @return {Object.<string, string>}
  */
-function headersToLowerCase(headers) {
-  let lowerCaseHeaders = {};
+function headersToLowerCase(headers: RequestHeaders): RequestHeaders {
+  let lowerCaseHeaders = {} as RequestHeaders;
   for (let header of Object.keys(headers)) {
     lowerCaseHeaders[header.toLowerCase()] = headers[header];
   }
@@ -135,24 +161,22 @@ function headersToLowerCase(headers) {
 
 const ajaxQueue = new utils.Queue();
 
-/**
- * @typedef SaveAjaxDataOptions
- * @property {string} url The url to get ajax data from
- * @property {object} request The POST data to be sent as xml
- * @property {boolean} [responseMustBeOk]
- * @property {boolean} [enc] Whether the request should be encrypted
- * @property {boolean} [enp]
- * @property {function} [converter]
- * @property {function} [map]
- */
+interface SaveAjaxDataOptions<ResponseMustBeOk extends boolean> extends ResponseProcessorOptions {
+  /** The url to get ajax data from */
+  url: string;
+  /** The POST data to be sent as xml */
+  request: any;
+  responseMustBeOk?: ResponseMustBeOk;
+  /** Whether the request should be encrypted */
+  enc?: boolean;
+  enp?: boolean;
+}
 
-/**
- *
- * @param {SaveAjaxDataOptions} options
- * @return {Promise<any>}
- */
 // TODO: Simplify this by splitting up
-export function saveAjaxData(options) {
+export function saveAjaxData<
+  ResponseMustBeOk extends boolean,
+  R extends (ResponseMustBeOk extends true ? AjaxOkResponse : object)
+>(options: SaveAjaxDataOptions<ResponseMustBeOk>): Promise<R> {
   return new Promise((resolve, reject) => {
     ajaxQueue.add(async () => {
       try {
@@ -160,9 +184,9 @@ export function saveAjaxData(options) {
         // get copy of tokens to work with
         tokens = tokens.slice();
         const moduleSwitch = await config.getModuleSwitch();
-        let xmlString = objectToXml({request: options.request});
+        let xmlString = objectToXml({ request: options.request });
 
-        const headers = {};
+        const headers = {} as RequestHeaders;
 
         // TODO: Fix encryption
         if (options.enc && moduleSwitch.encrypt_enabled) {
@@ -187,7 +211,7 @@ export function saveAjaxData(options) {
         try {
           const processed = await processXmlResponse(ret.data, options.responseMustBeOk);
           if (options.url === 'api/user/login' && tokens.length > 0) {
-          // login success, empty token list
+            // login success, empty token list
             tokens = [];
             updateTokens(tokens);
           }
@@ -225,8 +249,8 @@ export function saveAjaxData(options) {
   });
 }
 
-export async function ping(url='') {
+export async function ping(url = '') {
   await basicRequest(url);
 }
 
-export {isAjaxReturnOk, xmlRequest};
+export { isAjaxReturnOk, xmlRequest };

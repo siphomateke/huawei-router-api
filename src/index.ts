@@ -19,8 +19,8 @@ export default {
   },
   config: config,
   sms: {
-    types: sms.types,
-    boxTypes: sms.boxTypes,
+    types: sms.SmsType,
+    boxTypes: sms.BoxType,
     parse: sms.parse,
     getSmsCount: sms.getSmsCount,
     getSmsList: sms.getSmsList,

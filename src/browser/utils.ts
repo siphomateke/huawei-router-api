@@ -1,19 +1,14 @@
 'use strict';
-import {RouterError} from '@/error';
+import { RouterError } from '@/error';
 
-/**
- *
- * @param {string} url
- * @return {URL}
- */
-export function parseRouterUrl(url) {
-  let parsedUrl = null;
+export function parseRouterUrl(url: string): URL {
+  let parsedUrl: URL | null = null;
   try {
     parsedUrl = new URL(url);
   } catch (e) {
     if (e instanceof TypeError) {
       throw new RouterError(
-        'invalid_router_url', 'Invalid router page url: '+url);
+        'invalid_router_url', 'Invalid router page url: ' + url);
     } else {
       throw e;
     }
@@ -21,11 +16,6 @@ export function parseRouterUrl(url) {
   return parsedUrl;
 }
 
-/**
- *
- * @param {string} str
- * @return {string}
- */
-export function base64encode(str) {
+export function base64encode(str: string): string {
   return btoa(str);
 }

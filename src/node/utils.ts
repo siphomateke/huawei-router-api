@@ -2,12 +2,7 @@
 import {RouterError} from '@/error';
 import {URL} from 'url';
 
-/**
- *
- * @param {string} url
- * @return {URL}
- */
-export function parseRouterUrl(url) {
+export function parseRouterUrl(url: string): URL {
   let parsedUrl = null;
   try {
     parsedUrl = new URL(url);
@@ -22,11 +17,6 @@ export function parseRouterUrl(url) {
   return parsedUrl;
 }
 
-/**
- *
- * @param {string} str
- * @return {string}
- */
-export function base64encode(str) {
+export function base64encode(str: string): string {
   return Buffer.from(str, 'binary').toString('base64');
 }

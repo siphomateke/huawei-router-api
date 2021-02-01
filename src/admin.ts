@@ -3,17 +3,13 @@ import * as ajax from '@/ajax';
 import config from '@/config';
 import * as utils from '@/utils';
 
-/**
- * @typedef StateLogin
- * @property {number} State
- * @property {string} Username
- * @property {number} password_type
- */
+interface StateLogin {
+  State: number,
+  Username: string,
+  password_type: number,
+};
 
-/**
- * @return {Promise<StateLogin>}
- */
-export async function getLoginState() {
+export async function getLoginState(): Promise<StateLogin> {
   const data = await ajax.getAjaxData({url: 'api/user/state-login'});
   return {
     State: parseInt(data.State, 10),
@@ -22,7 +18,7 @@ export async function getLoginState() {
   };
 }
 
-export async function isLoggedIn() {
+export async function isLoggedIn(): Promise<boolean> {
   const ret = await getLoginState();
   if (ret.State === 0) {
     return true;

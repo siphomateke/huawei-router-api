@@ -2,37 +2,31 @@
 import moment from 'moment';
 import * as ajax from '@/ajax';
 import config from '@/config';
-import {RouterError, throwApiError} from '@/error';
+import { RouterError, throwApiError } from '@/error';
 
-/**
- * @enum {string}
- */
-export const types = {
-  RECHARGE: 'recharge',
-  DATA: 'data',
-  DATA_PERCENT: 'data_percent',
-  ACTIVATED: 'activated',
-  DEPLETED: 'depleted',
-  AD: 'ad',
+export enum SmsType {
+  RECHARGE = 'recharge',
+  DATA = 'data',
+  DATA_PERCENT = 'data_percent',
+  ACTIVATED = 'activated',
+  DEPLETED = 'depleted',
+  AD = 'ad',
 };
 
-/**
- * @enum {number}
- */
-export const boxTypes = {
-  INBOX: 1,
-  SENT: 2,
-  DRAFT: 3,
-  TRASH: 4,
-  SIM_INBOX: 5,
-  SIM_SENT: 6,
-  SIM_DRAFT: 7,
-  MIX_INBOX: 8,
-  MIX_SENT: 9,
-  MIX_DRAFT: 10,
+export enum BoxType {
+  INBOX = 1,
+  SENT = 2,
+  DRAFT = 3,
+  TRASH = 4,
+  SIM_INBOX = 5,
+  SIM_SENT = 6,
+  SIM_DRAFT = 7,
+  MIX_INBOX = 8,
+  MIX_SENT = 9,
+  MIX_DRAFT = 10,
 };
 
-function arrayMatch(message, regExpMatch, mapFunc) {
+function arrayMatch<T>(message: string, regExpMatch: string | RegExp, mapFunc: (item: string) => T): T[] {
   const data = message.match(regExpMatch);
   if (data) {
     return data.map(mapFunc);
@@ -40,17 +34,14 @@ function arrayMatch(message, regExpMatch, mapFunc) {
     return [];
   }
 }
-/**
- * @typedef SmsDataUsage
- * @property {number} amount
- * @property {string} unit
- */
+interface SmsDataUsage {
+  amount: number;
+  unit: string;
+}
 /**
  * Get's data usage strings in the message
- * @param {string} message
- * @return {SmsDataUsage[]}
  */
-function getDataUsage(message) {
+function getDataUsage(message: string): SmsDataUsage[] {
   return arrayMatch(message, /(\d*)(\.*)(\d*)( *)mb/gi, element => {
     return {
       amount: parseFloat(element.replace(/( *)mb/i, '')),
@@ -58,30 +49,31 @@ function getDataUsage(message) {
     };
   });
 }
-function getExpiryDate(message) {
+function getExpiryDate(message: string) {
   return arrayMatch(
     message, /(\d+)-(\d+)-(\d+) (\d{2}):(\d{2}):(\d{2})/g,
     date => moment(date).valueOf());
 }
-function getMoney(message) {
+function getMoney(message: string) {
   return arrayMatch(
     message, /(\d*)(\.*)(\d*)( *)kwacha/gi,
     element => parseFloat(element.replace(/( *)kwacha/i, '')));
 }
 
-function getPercent(message) {
+function getPercent(message: string) {
   return arrayMatch(
     message, /\d+%/gi,
     element => parseFloat(element.replace(/%/, '')));
 }
 
-/**
- *
- * @param {object} info
- * @param {string} message
- * @return {types}
- */
-function getType(info, message) {
+interface MessageInfo {
+  data: SmsDataUsage[],
+  expires: number[],
+  money: number[],
+  percent: number[],
+}
+
+function getType(info: MessageInfo, message: string): SmsType {
   const adPhrases = [
     'spaka',
     'bonus',
@@ -110,7 +102,7 @@ function getType(info, message) {
    * - The recharged amount is 50.000 kwacha.Your current balance is 250.522 kwacha..With MTN everyone is a winner, Earn more Ni Zee points by RECHARGING NOW! Dial *1212#!
    */
   if (info.money.length >= 2 && ml.includes('recharged') && ml.includes('balance')) {
-    return types.RECHARGE;
+    return SmsType.RECHARGE;
   }
   if (info.data.length > 0) {
     /**
@@ -118,7 +110,7 @@ function getType(info, message) {
      * - Y'ello, you have used up 90% of your 10240 MB Data Bundle.
      */
     if (ml.search(/\d+%/) > 0) {
-      return types.DATA_PERCENT;
+      return SmsType.DATA_PERCENT;
     }
     /**
      * Examples:
@@ -126,7 +118,7 @@ function getType(info, message) {
      * - Y'ello! You have 4559.28 MB MTN Home Day Data.
      */
     if (info.expires.length > 0 || (ml.includes('have') && ml.includes('data'))) {
-      return types.DATA;
+      return SmsType.DATA;
     }
   }
   /**
@@ -134,8 +126,8 @@ function getType(info, message) {
    * - Y'ello! Your 10GB MTN Home Internet Bundle (Once-Off) has been activated successfully.
    */
   if (ml.includes('activated') &&
-  (ml.includes('bundle') || ml.includes('activated successfully'))) {
-    return types.ACTIVATED;
+    (ml.includes('bundle') || ml.includes('activated successfully'))) {
+    return SmsType.ACTIVATED;
   }
   /**
    * Examples:
@@ -143,12 +135,17 @@ function getType(info, message) {
    * - You have used all your Data Bundle.Your main balance is K 10.5228.Dial *335# to purchase a Bundle Now.
    */
   if ((ml.includes('depleted') || ml.includes('used all')) && ml.includes('bundle')) {
-    return types.DEPLETED;
+    return SmsType.DEPLETED;
   }
-  return types.AD;
+  return SmsType.AD;
 }
-export function parse(message) {
-  const info = {
+
+interface ParsedMessage extends MessageInfo {
+  type: SmsType;
+}
+
+export function parse(message: string): ParsedMessage {
+  const info: MessageInfo = {
     data: getDataUsage(message),
     expires: getExpiryDate(message),
     money: getMoney(message),
@@ -162,33 +159,32 @@ export function parse(message) {
 
 // Separate
 
-/**
- * @typedef SmsCount
- * @property {number} LocalUnread
- * @property {number} LocalInbox
- * @property {number} LocalOutbox
- * @property {number} LocalDraft
- * @property {number} LocalDeleted
- * @property {number} LocalTotal computed value
- * @property {number} SimUnread
- * @property {number} SimInbox
- * @property {number} SimOutbox
- * @property {number} SimDraft
- * @property {number} LocalMax
- * @property {number} SimMax
- * @property {number} [SimUsed]
- * @property {number} SimTotal equal to SimUsed if it exists, otherwise computed
- * @property {number} NewMsg
- */
+interface SmsCount {
+  LocalUnread: number;
+  LocalInbox: number;
+  LocalOutbox: number;
+  LocalDraft: number;
+  LocalDeleted: number;
+  /** computed value */
+  LocalTotal: number;
+  SimUnread: number;
+  SimInbox: number;
+  SimOutbox: number;
+  SimDraft: number;
+  LocalMax: number;
+  SimMax: number;
+  SimUsed?: number;
+  /** equal to SimUsed if it exists, otherwise computed */
+  SimTotal: number;
+  NewMsg: number;
+}
 
 /**
  * Gets the number of read and unread messages
- * @param {boolean} [includeComputed=true]
- * @return {Promise<SmsCount>}
  */
-export async function getSmsCount(includeComputed=true) {
-  const data = await ajax.getAjaxData({url: 'api/sms/sms-count'});
-  const processed = {};
+export async function getSmsCount(includeComputed: boolean = true): Promise<SmsCount> {
+  const data = await ajax.getAjaxData({ url: 'api/sms/sms-count' });
+  const processed = {} as SmsCount;
   for (const key of Object.keys(data)) {
     processed[key] = parseInt(data[key], 10);
   }
@@ -206,45 +202,48 @@ export async function getSmsCount(includeComputed=true) {
   return processed;
 }
 
-/**
- * @enum {number}
- */
-export const SmstatTypes = {
-  UNREAD: 0,
-  READ: 1,
-  SIM: 2,
-  SENT: 3,
+export enum SmstatTypes {
+  UNREAD = 0,
+  READ = 1,
+  SIM = 2,
+  SENT = 3,
 };
 
-/**
- * @typedef Message
- * @property {number} Smstat Sms type, see SmstatTypes
- * @property {number} Index
- * @property {string|number} Phone The phone number from which the SMS was sent
- * @property {string} Content The actual content of the SMS
- * @property {string} Date The date the SMS was received
- * @property {any} Sca
- * @property {number} SaveType
- * @property {number} Priority
- * @property {number} SmsType
- * @see SmstatTypes
- */
+interface Message {
+  /** SMS state type */
+  Smstat: SmstatTypes;
+  Index: number;
+  /** The phone number from which the SMS was sent */
+  Phone: string | number;
+  /** The actual content of the SMS */
+  Content: string;
+  /** The date the SMS was received */
+  Date: string;
+  Sca: any;
+  SaveType: number;
+  Priority: number;
+  SmsType: number;
+}
 
-// TODO: Fix SmsBoxTypes JSDoc
-/**
- * @typedef SmsListOptions
- * @property {number} [page=1]
- * @property {number} [perPage=20]
- * @property {number} [boxType=1] Which box to retreive. Can be Inbox(1), sent(2) or draft(3)
- * @property {('desc'|'asc')} [sortOrder=desc]
-*/
+interface SmsListOptions {
+  /** @default 1 */
+  page?: number;
+  /** @default 20 */
+  perPage?: number;
+  /**
+   * Which box to retreive. Can be Inbox(1), sent(2) or draft(3)
+   * @default 1
+   */
+  boxType?: BoxType;
+  /** @default 'desc' */
+  sortOrder?: ('desc' | 'asc');
+}
 
 /**
- * Get's the list of SMSs from the router
- * @param {SmsListOptions} options Options
- * @return {Promise<Message[]>}
+ * Gets the list of SMS messages from the router.
+ * @param options Options
  */
-export async function getSmsList(options) {
+export async function getSmsList(options: SmsListOptions): Promise<Message[]> {
   options = Object.assign({
     page: 1,
     perPage: 20,
@@ -271,19 +270,12 @@ export async function getSmsList(options) {
   }
 }
 
-/**
- * @typedef FilterSmsListOption
- * @property {number} [minDate]
- * @property {boolean} [read]
- */
+interface FilterSmsListOption {
+  minDate?: number;
+  read?: boolean;
+}
 
-/**
- *
- * @param {FilterSmsListOption} options
- * @param {Message[]} list
- * @return {Message[]}
- */
-function filterSmsList(options, list) {
+function filterSmsList(options: FilterSmsListOption, list: Message[]): Message[] {
   const filteredList = [];
   for (const message of list) {
     if (options && 'minDate' in options) {
@@ -302,24 +294,19 @@ function filterSmsList(options, list) {
   return filteredList;
 }
 
-/**
- * @typedef FullSmsListOptions
- * @property {number} total
- * @property {FilterSmsListOption} [filter]
- */
+interface FullSmsListOptions {
+  total: number;
+  filter?: FilterSmsListOption;
+}
 
-/**
- *
- * @param {FullSmsListOptions} options
- * @param {SmsListOptions} smsListOptions
- * @param {Message[]} list
- * @param {number} perPage
- * @param {number} total
- * @param {number} [page=1]
- * @return {Promise<Message[]>}
- */
 async function getFullSmsListRecursive(
-  options, smsListOptions, list, perPage, total, page=1) {
+  options: FullSmsListOptions,
+  smsListOptions: SmsListOptions,
+  list: Message[],
+  perPage: number,
+  total: number,
+  page: number = 1
+): Promise<Message[]> {
   smsListOptions.perPage = perPage;
   smsListOptions.page = page;
   const currentList = await getSmsList(smsListOptions);
@@ -342,7 +329,7 @@ async function getFullSmsListRecursive(
   // then we can be efficient and stop queries once the date is
   // larger than the minimum date
   if (options.filter && options.filter.minDate && smsListOptions.sortOrder === 'desc') {
-    const dateFilteredList = filterSmsList({minDate: options.filter.minDate}, processedList);
+    const dateFilteredList = filterSmsList({ minDate: options.filter.minDate }, processedList);
     // If the date filtered list does not match the list then
     // this is the last page we should check as anything later
     // will be older than the minimum date
@@ -361,13 +348,10 @@ async function getFullSmsListRecursive(
   }
 }
 
-/**
- *
- * @param {FullSmsListOptions} options
- * @param {SmsListOptions} [smsListOptions]
- * @return {Promise<Message[]>}
- */
-export async function getFullSmsList(options, smsListOptions={}) {
+export async function getFullSmsList(
+  options: FullSmsListOptions,
+  smsListOptions: SmsListOptions = {}
+): Promise<Message[]> {
   smsListOptions = Object.assign({
     sortOrder: 'desc',
   }, smsListOptions);
@@ -390,10 +374,9 @@ export async function getFullSmsList(options, smsListOptions={}) {
 
 /**
  *
- * @param {number} idx The index of the SMS
- * @return {Promise<any>}
+ * @param idx The index of the SMS
  */
-export function setSmsAsRead(idx) {
+export function setSmsAsRead(idx: number) {
   return ajax.saveAjaxData({
     url: 'api/sms/set-read',
     request: {
@@ -403,13 +386,19 @@ export function setSmsAsRead(idx) {
   });
 }
 
-/**
- * @typedef CreateSmsRequestOptions
- * @property {number} index The index of the message. Only used for sending drafts
- * @property {string[]} numbers An array of numbers to send the sms to
- * @property {string} content The SMS body
- */
-export function createSmsRequest(options) {
+interface SendSmsOptions {
+  /** An array of numbers to send the sms to */
+  numbers: string[];
+  /** The SMS body */
+  content: string;
+}
+
+interface SmsRequestOptions extends SendSmsOptions {
+  /** The index of the message. Only used for sending drafts */
+  index?: number;
+}
+// FIXME: Type return
+export function createSmsRequest(options: SmsRequestOptions) {
   options = Object.assign({
     index: -1,
     numbers: [],
@@ -434,19 +423,10 @@ export function createSmsRequest(options) {
 }
 
 /**
- * @typedef SaveSmsOptions
- * @property {number} index The index of the messsage. Only used for sending drafts
- * @property {string[]} numbers An array of numbers to send the sms to
- * @property {string} content The SMS body
- */
-
-/**
  * Sends an sms or saves a draft
- * @param {SaveSmsOptions} options
- * @return {Promise<any>}
  */
 // TODO: Find out what pb and cancelSendSms is in original router
-export function saveSms(options) {
+export function saveSms(options: SmsRequestOptions) {
   return ajax.saveAjaxData({
     url: 'api/sms/save-sms',
     request: createSmsRequest(options),
@@ -454,35 +434,21 @@ export function saveSms(options) {
   });
 }
 
-/**
- * @typedef SmsSendStatus
- * @property {string} TotalCount
- * @property {string} CurIndex
- * @property {string} Phone
- * @property {string} SucPhone
- * @property {string} FailPhone
- */
+interface SmsSendStatus {
+  TotalCount: string;
+  CurIndex: string;
+  Phone: string;
+  SucPhone: string;
+  FailPhone: string;
+}
 
-/**
- * @return {Promise<SmsSendStatus>}
- */
-export function getSmsSendStatus() {
+export function getSmsSendStatus(): Promise<SmsSendStatus> {
   return ajax.getAjaxData({
     url: 'api/sms/send-status',
   });
 }
 
-/**
- * @typedef SendSmsOptions
- * @property {string[]} numbers An array of numbers to send the sms to
- * @property {string} content The SMS body
- */
-
-/**
- * @param {SendSmsOptions} options
- * @return {Promise<SmsSendStatus>}
- */
-export async function sendSms(options) {
+export async function sendSms(options: SendSmsOptions): Promise<SmsSendStatus> {
   await ajax.saveAjaxData({
     url: 'api/sms/send-sms',
     request: createSmsRequest(options),
@@ -491,10 +457,7 @@ export async function sendSms(options) {
   return getSmsSendStatus();
 }
 
-/**
- * @return {Promise<SmsSendStatus>}
- */
-export async function cancelSendSms() {
+export async function cancelSendSms(): Promise<SmsSendStatus> {
   await ajax.saveAjaxData({
     url: 'api/sms/cancel-send',
     request: 1,
@@ -504,12 +467,11 @@ export async function cancelSendSms() {
 }
 
 /**
- * Delete's all messages with the given indices
- * @param {number[]} indices An array of indices of messages
- * @return {Promise<any>}
+ * Deletes all messages with the given indices
+ * @param indices An array of indices of messages
  */
-export function deleteSms(indices) {
-  const request = {Index: indices};
+export function deleteSms(indices: number[]) {
+  const request = { Index: indices };
   return ajax.saveAjaxData({
     url: 'api/sms/delete-sms',
     request: request,
@@ -522,16 +484,15 @@ export function deleteSms(indices) {
  * - importing is a feature of this router
  * - there are any messages to import
  * - there is enough space
- * @return {Promise<boolean>}
  * @throws {RouterError}
  */
-export async function readyToImport() {
+export async function readyToImport(): Promise<boolean> {
   const smsConfig = await config.getSmsConfig();
   if (!smsConfig.import_enabled) {
     throw new RouterError('sms_import_disabled');
   }
   const smsCount = await getSmsCount();
-  if (smsCount.SimTotal == 0 ) {
+  if (smsCount.SimTotal == 0) {
     throw new RouterError('sms_import_sim_empty');
   }
   if (smsCount.LocalTotal >= smsCount.LocalMax) {
@@ -540,19 +501,17 @@ export async function readyToImport() {
   return true;
 }
 
-/**
- * @typedef importMessagesResponse
- * @property {number} successNumber
- * @property {number} failNumber
- */
+interface ImportMessagesResponse {
+  successNumber: number;
+  failNumber: number;
+}
 
 /**
  * Import's messages from the sim card
- * @param {boolean} checkIfReady Whether to call readyToImport. Set this to false if you want to check if importing is ready on your own
- * @return {Promise<importMessagesResponse>}
+ * @param checkIfReady Whether to call readyToImport. Set this to false if you want to check if importing is ready on your own
  * @throws {RouterError}
  */
-export async function importMessages(checkIfReady=true) {
+export async function importMessages(checkIfReady: boolean = true): Promise<ImportMessagesResponse> {
   if (checkIfReady) {
     await readyToImport();
   }
@@ -569,7 +528,7 @@ export async function importMessages(checkIfReady=true) {
     const successNumber = parseInt(data.SucNumber, 10);
     const failNumber = parseInt(data.FailNumber, 10);
     if (data.Code.toLowerCase() === 'ok' || successNumber > 0) {
-      return {successNumber, failNumber};
+      return { successNumber, failNumber };
     } else {
       throwApiError(data.Code);
     }

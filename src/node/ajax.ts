@@ -1,14 +1,14 @@
 'use strict';
 import {basicRequest} from '@/common/ajax';
 import {JSDOM} from 'jsdom';
+import { VerificationToken } from '@/ajax';
 
 /**
  * Gets verification tokens required for making admin requests and logging in
- * @param {string} url
- * @return {Promise<string[]>}
  */
-export async function getTokensFromPage(url) {
+export async function getTokensFromPage(url: string): Promise<VerificationToken[]> {
   const data = await basicRequest(url);
+  // FIXME: Give `doc` a type
   const doc = (new JSDOM(data)).window.document;
   const meta = doc.querySelectorAll('meta[name=csrf_token]');
   let requestVerificationTokens = [];

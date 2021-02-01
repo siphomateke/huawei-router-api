@@ -1,41 +1,32 @@
 import * as ajax from '@/ajax';
 
-/**
- * @typedef TrafficStatistics
- * @property {number} CurrentConnectTime
- * @property {number} CurrentDownload
- * @property {number} CurrentDownloadRate
- * @property {number} CurrentUpload
- * @property {number} CurrentUploadRate
- *
- * @property {number} TotalConnectTime
- * @property {number} TotalDownload
- * @property {number} TotalUpload
- * @property {number} TotalDownload
- * @property {number} showtraffic
- */
+interface TrafficStatistics {
+  CurrentConnectTime: number;
+  CurrentDownload: number;
+  CurrentDownloadRate: number;
+  CurrentUpload: number;
+  CurrentUploadRate: number;
 
-/**
- * @return {Promise<TrafficStatistics>}
- */
-export function getTrafficStatistics() {
+  TotalConnectTime: number;
+  TotalDownload: number;
+  TotalUpload: number;
+  showtraffic: number;
+}
+
+export function getTrafficStatistics(): Promise<TrafficStatistics> {
   return ajax.getAjaxData({
     url: 'api/monitoring/traffic-statistics',
     map: item => parseInt(item, 10),
   });
 }
 
-/**
- * @typedef Notifications
- * @property {number} UnreadMessage
- * @property {boolean} SmsStorageFull
- * @property {number} OnlineUpdateStatus
-*/
+interface RouterNotifications {
+  UnreadMessage: number;
+  SmsStorageFull: boolean;
+  OnlineUpdateStatus: number;
+}
 
-/**
- * @return {Promise<Notifications>}
- */
-export async function checkNotifications() {
+export async function checkNotifications(): Promise<RouterNotifications> {
   const ret = await ajax.getAjaxData({
     url: 'api/monitoring/check-notifications',
   });
@@ -48,7 +39,6 @@ export async function checkNotifications() {
 
 /**
  * Resets network traffic statistics
- * @return {Promise<any>}
  */
 export function resetStatistics() {
   return ajax.saveAjaxData({
@@ -60,31 +50,29 @@ export function resetStatistics() {
   });
 }
 
-/**
- * @typedef DataUsageSettings
- * @property {number} StartDay
- * @property {number} DataLimit
- * @property {string} DataLimitUnit
- * @property {number} DataLimitAwoke
- * @property {number} MonthThreshold
- * @property {number} SetMonthData
- * @property {number} trafficmaxlimit
- * @property {boolean} turnoffdataenable
- * @property {boolean} turnoffdataswitch
- * @property {boolean} turnoffdataflag
- */
+interface DataUsageSettings {
+  StartDay: number;
+  DataLimit: number;
+  DataLimitUnit: string;
+  DataLimitAwoke: number;
+  MonthThreshold: number;
+  SetMonthData: number;
+  trafficmaxlimit: number;
+  turnoffdataenable: boolean;
+  turnoffdataswitch: boolean;
+  turnoffdataflag: boolean;
+}
 
 /**
  * Get's data usage related settings. E.g. start date, data limit, threshold
- * @return {Promise<DataUsageSettings>}
  */
-export async function getDataUsageSettings() {
+export async function getDataUsageSettings(): Promise<DataUsageSettings> {
   const data = await ajax.getAjaxData({
     url: 'api/monitoring/start_date',
   });
   const len = data.DataLimit.length;
-  const dataLimit = data.DataLimit.substring(0, len-2);
-  const dataLimitUnit = data.DataLimit.substring(len-2, len);
+  const dataLimit = data.DataLimit.substring(0, len - 2);
+  const dataLimitUnit = data.DataLimit.substring(len - 2, len);
   return {
     StartDay: parseInt(data.StartDay, 10),
     DataLimit: parseInt(dataLimit, 10),
@@ -99,25 +87,20 @@ export async function getDataUsageSettings() {
   };
 }
 
-/**
- * @typedef DataUsageSettingsSet
- * @property {number} startDay
- * @property {number} dataLimit
- * @property {string} dataLimitUnit
- * @property {number} dataLimitAwoke
- * @property {number} monthThreshold
- * @property {number} setMonthData
- * @property {number} trafficMaxLimit
- * @property {boolean} turnOffDataEnable
- * @property {boolean} turnOffDataSwitch
- * @property {boolean} turnOffDataFlag
- */
+interface SetDataUsageSettingsFnOptions {
+  startDay: number;
+  dataLimit: number;
+  dataLimitUnit: string;
+  dataLimitAwoke: number;
+  monthThreshold: number;
+  setMonthData: number;
+  trafficMaxLimit: number;
+  turnOffDataEnable: boolean;
+  turnOffDataSwitch: boolean;
+  turnOffDataFlag: boolean;
+}
 
-/**
- * @param {DataUsageSettingsSet} options
- * @return {Promise<any>}
- */
-export function setDataUsageSettings(options) {
+export function setDataUsageSettings(options: SetDataUsageSettingsFnOptions) {
   return ajax.saveAjaxData({
     url: 'api/monitoring/start_date',
     request: {
@@ -135,174 +118,227 @@ export function setDataUsageSettings(options) {
   });
 }
 
-export const connectionStatuses = {
-  COMBINING: [900],
-  CONNECTED: [901],
-  CONNECTION_ERROR_DENIED_NETWORK_ACCESS: [7, 11, 14, 37, 131079, 131080, 131081, 131082, 131083, 131084, 131085, 131086, 131087, 131088, 131089],
-  CONNECTION_ERROR_WRONG_PROFILE: [2, 3, 5, 8, 20, 21, 23, 27, 28, 29, 30, 31, 32, 33, 65538, 65539, 65567, 65568, 131073, 131074, 131076, 131078],
-  CONNECTION_ERROR: [906],
-  CONNECTION_FAILED: [904],
-  DATA_TRANSMISSION_LIMIT_EXCEEDED: [201],
-  DISCONNECTED: [902],
-  DISCONNECTION: [903],
-  NO_AUTOMATIC_CONNECTION_ESTABLISHED: [112],
-  NO_AUTOMATIC_ROAMING_CONNECTION_ESTABLISHED: [113],
-  NO_CONNECTION_NO_ROAMING: [12, 13],
-  NO_CONNECTION_WEAK_SIGNAL: [905],
-  NO_RECONNECTION: [114],
-  NO_ROAMING_CALL_AGAIN: [115],
+export enum ConnectionStatusGroup {
+  COMBINING,
+  CONNECTED,
+  CONNECTION_ERROR_DENIED_NETWORK_ACCESS,
+  CONNECTION_ERROR_WRONG_PROFILE,
+  CONNECTION_ERROR,
+  CONNECTION_FAILED,
+  DATA_TRANSMISSION_LIMIT_EXCEEDED,
+  DISCONNECTED,
+  DISCONNECTION,
+  NO_AUTOMATIC_CONNECTION_ESTABLISHED,
+  NO_AUTOMATIC_ROAMING_CONNECTION_ESTABLISHED,
+  NO_CONNECTION_NO_ROAMING,
+  NO_CONNECTION_WEAK_SIGNAL,
+  NO_RECONNECTION,
+  NO_ROAMING_CALL_AGAIN,
+}
+
+const s = ConnectionStatusGroup;
+
+export const connectionStatuses: { [key in ConnectionStatusGroup]: number[]} = {
+  [s.COMBINING]: [900],
+  [s.CONNECTED]: [901],
+  [s.CONNECTION_ERROR_DENIED_NETWORK_ACCESS]: [7, 11, 14, 37, 131079, 131080, 131081, 131082, 131083, 131084, 131085, 131086, 131087, 131088, 131089],
+  [s.CONNECTION_ERROR_WRONG_PROFILE]: [2, 3, 5, 8, 20, 21, 23, 27, 28, 29, 30, 31, 32, 33, 65538, 65539, 65567, 65568, 131073, 131074, 131076, 131078],
+  [s.CONNECTION_ERROR]: [906],
+  [s.CONNECTION_FAILED]: [904],
+  [s.DATA_TRANSMISSION_LIMIT_EXCEEDED]: [201],
+  [s.DISCONNECTED]: [902],
+  [s.DISCONNECTION]: [903],
+  [s.NO_AUTOMATIC_CONNECTION_ESTABLISHED]: [112],
+  [s.NO_AUTOMATIC_ROAMING_CONNECTION_ESTABLISHED]: [113],
+  [s.NO_CONNECTION_NO_ROAMING]: [12, 13],
+  [s.NO_CONNECTION_WEAK_SIGNAL]: [905],
+  [s.NO_RECONNECTION]: [114],
+  [s.NO_ROAMING_CALL_AGAIN]: [115],
 };
 
 /**
  * Compares a connection status group to a single status
- * @param {Array} compare
- * @param {number} status
  * @see connectionStatuses
- * @return {boolean}
  */
-export function compareConnectionStatus(compare, status) {
+export function compareConnectionStatus(compare: number[], status: number): boolean {
   return compare.includes(status);
 }
 
-export const networkTypes = {
-  0: 'no service',
-  1: 'GSM',
-  2: 'GPRS',
-  3: 'EDGE',
-  4: 'WCDMA',
-  5: 'HSDPA',
-  6: 'HSUPA',
-  7: 'HSPA',
-  8: 'TDSCDMA',
-  9: 'HSPA +',
-  10: 'EVDO rev. 0',
-  11: 'EVDO rev. AND',
-  12: 'EVDO rev. B',
-  13: '1xRTT',
-  14: 'UMB',
-  15: '1xEVDV',
-  16: '3xRTT',
-  17: 'HSPA + 64QAM',
-  18: 'HSPA + MIMO',
-  19: 'LTE',
-  21: 'IS95A',
-  22: 'IS95B',
-  23: 'CDMA1x',
-  24: 'EVDO rev. 0',
-  25: 'EVDO rev. AND',
-  26: 'EVDO rev. B',
-  27: 'Hybrid CDMA1x',
-  28: 'Hybrid EVDO rev. 0',
-  29: 'Hybrid EVDO rev. AND',
-  30: 'Hybrid EVDO rev. B',
-  31: 'EHRPD rev. 0',
-  32: 'EHRPD rev. AND',
-  33: 'EHRPD rev. B',
-  34: 'Hybrid EHRPD rev. 0',
-  35: 'Hybrid EHRPD rev. AND',
-  36: 'Hybrid EHRPD rev. B',
-  41: 'WCDMA',
-  42: 'HSDPA',
-  43: 'HSUPA',
-  44: 'HSPA',
-  45: 'HSPA +',
-  46: 'DC HSPA +',
-  61: 'TD SCDMA',
-  62: 'TD HSDPA',
-  63: 'TD HSUPA',
-  64: 'TD HSPA',
-  65: 'TD HSPA +',
-  81: '802.16E',
-  101: 'LTE',
+export enum NetworkType {
+  NO_SERVICE,
+  GSM,
+  GPRS,
+  EDGE,
+  WCDMA,
+  HSDPA,
+  HSUPA,
+  HSPA,
+  TDSCDMA,
+  HSPA_PLUS,
+  EVDO_REV_0,
+  EVDO_REV_AND,
+  EVDO_REV_B,
+  '1X_RTT',
+  UMB,
+  '1X_EVDV',
+  '3X_RTT',
+  HSPA_PLUS_64QAM,
+  HSPA_PLUS_MIMO,
+  LTE,
+  IS95A,
+  IS95B,
+  CDMA_1X,
+  HYBRID_CDMA_1X,
+  HYBRID_EVDO_REV_0,
+  HYBRID_EVDO_REV_AND,
+  HYBRID_EVDO_REV_B,
+  EHRPD_REV_0,
+  EHRPD_REV_AND,
+  EHRPD_REV_B,
+  HYBRID_EHRPD_REV_0,
+  HYBRID_EHRPD_REV_and,
+  HYBRID_EHRPD_REV_B,
+  DC_HSPA_PLUS,
+  TD_SCDMA,
+  TD_HSDPA,
+  TD_HSUPA,
+  TD_HSPA,
+  TD_HSPA_PLUS,
+  '802.16E',
+}
+
+export const networkTypes: { [code: number]: NetworkType } = {
+  0: NetworkType.NO_SERVICE,
+  1: NetworkType.GSM,
+  2: NetworkType.GPRS,
+  3: NetworkType.EDGE,
+  4: NetworkType.WCDMA,
+  5: NetworkType.HSDPA,
+  6: NetworkType.HSUPA,
+  7: NetworkType.HSPA,
+  8: NetworkType.TDSCDMA,
+  9: NetworkType.HSPA_PLUS,
+  10: NetworkType.EVDO_REV_0,
+  11: NetworkType.EVDO_REV_AND,
+  12: NetworkType.EVDO_REV_B,
+  13: NetworkType['1X_RTT'],
+  14: NetworkType.UMB,
+  15: NetworkType['1X_EVDV'],
+  16: NetworkType['3X_RTT'],
+  17: NetworkType.HSPA_PLUS_64QAM,
+  18: NetworkType.HSPA_PLUS_MIMO,
+  19: NetworkType.LTE,
+  21: NetworkType.IS95A,
+  22: NetworkType.IS95B,
+  23: NetworkType.CDMA_1X,
+  24: NetworkType.EVDO_REV_0,
+  25: NetworkType.EVDO_REV_AND,
+  26: NetworkType.EVDO_REV_B,
+  27: NetworkType.HYBRID_CDMA_1X,
+  28: NetworkType.HYBRID_EVDO_REV_0,
+  29: NetworkType.HYBRID_EVDO_REV_AND,
+  30: NetworkType.HYBRID_EVDO_REV_B,
+  31: NetworkType.EHRPD_REV_0,
+  32: NetworkType.EHRPD_REV_AND,
+  33: NetworkType.EHRPD_REV_B,
+  34: NetworkType.HYBRID_EHRPD_REV_0,
+  35: NetworkType.HYBRID_EHRPD_REV_and,
+  36: NetworkType.HYBRID_EHRPD_REV_B,
+  41: NetworkType.WCDMA,
+  42: NetworkType.HSDPA,
+  43: NetworkType.HSUPA,
+  44: NetworkType.HSPA,
+  45: NetworkType.HSPA_PLUS,
+  46: NetworkType.DC_HSPA_PLUS,
+  61: NetworkType.TD_SCDMA,
+  62: NetworkType.TD_HSDPA,
+  63: NetworkType.TD_HSUPA,
+  64: NetworkType.TD_HSPA,
+  65: NetworkType.TD_HSPA_PLUS,
+  81: NetworkType['802.16E'],
+  101: NetworkType.LTE,
 };
 
 /**
  * Gets the name of a network type ID
- * @param {number} value
- * @return {string}
- * @see networkTypes
  */
-export function getNetworkType(value) {
+export function getNetworkType(value: number): NetworkType {
   return networkTypes[value];
 }
 
-export const simStatuses = {
-  NO_SIM_OR_INCORRECT: 0,
-  VALID_SIM: 1,
+export enum SimStatus {
+  NO_SIM_OR_INCORRECT = 0,
+  VALID_SIM = 1,
   /** Incorrect SIM card for link switching case (CS) */
-  INCORRECT_SIM_LINK_SWITCHING_CASE: 2,
+  INCORRECT_SIM_LINK_SWITCHING_CASE = 2,
   /** Incorrect SIM card for case of packet switching (PS) */
-  INCORRECT_SIM_PACKET_SWITCHING_CASE: 3,
+  INCORRECT_SIM_PACKET_SWITCHING_CASE = 3,
   /** Incorrect SIM card for link and packet switching (PS + CS) */
-  INCORRECT_SIM_LINK_AND_PACKET_SWITCHING_CASE: 4,
-  ROMSIM: 240,
-  NO_SIM: 255,
+  INCORRECT_SIM_LINK_AND_PACKET_SWITCHING_CASE = 4,
+  ROMSIM = 240,
+  NO_SIM = 255,
 };
 
-export const batteryStatuses = {
-  NORMAL: 0,
-  CHARGING: 1,
-  LOW: -1,
-  NO_BATTERY: 2,
+export enum BatteryStatus {
+  NORMAL = 0,
+  CHARGING = 1,
+  LOW = -1,
+  NO_BATTERY = 2,
 };
 
 // TODO: Add more service statuses
-export const serviceStatuses = {
-  AVAILABLE: 2,
+export enum ServiceStatus {
+  AVAILABLE = 2
 };
 
-export const wifiStatuses = {
-  DISABLED: '0',
-  ENABLED: '1',
-  INCLUDES_5G: '5G',
+export enum WifiStatus {
+  DISABLED = '0',
+  ENABLED = '1',
+  INCLUDES_5G = '5G',
 };
 
-export const roamingStatuses = {
-  DISABLED: 0,
-  ENABLED: 1,
-  NO_CHANGE: 2,
+export enum RoamingStatus {
+  DISABLED = 0,
+  ENABLED = 1,
+  NO_CHANGE = 2,
 };
 
-/**
- * FIXME: Change 'see x' to proper JSDoc links
- * @typedef Status
- * @property {number} ConnectionStatus see connectionStatuses
- * @property {number} WifiConnectionStatus
- * @property {string} SignalStrength
- * @property {number} SignalIcon
- * @property {number} CurrentNetworkType see networkTypes
- * @property {number} CurrentServiceDomain
- * @property {number} RoamingStatus see roamingStatuses
- * @property {number} BatteryStatus see batteryStatuses
- * @property {string} BatteryLevel
- * @property {string} BatteryPercent
- * @property {number} simlockStatus
- * @property {string} WanIPAddress
- * @property {string} WanIPv6Address
- * @property {string} PrimaryDns
- * @property {string} SecondaryDns
- * @property {string} PrimaryIPv6Dns
- * @property {string} SecondaryIPv6Dns
- * @property {number} CurrentWifiUser
- * @property {number} TotalWifiUser
- * @property {number} currenttotalwifiuser
- * @property {number} ServiceStatus see serviceStatuses
- * @property {number} SimStatus see simStatuses
- * @property {string} WifiStatus see wifiStatuses
- * @property {number} CurrentNetworkTypeEx see networkTypes
- * @property {number} maxsignal
- * @property {string} wifiindooronly
- * @property {string} wififrequence
- * @property {string} classify
- * @property {string} flymode
- * @property {string} cellroam
- * @property {string} voice_busy
- */
+interface Status {
+  /** @see connectionStatuses */
+  ConnectionStatus: number;
+  WifiConnectionStatus: number;
+  SignalStrength: string;
+  SignalIcon: number;
+  CurrentNetworkType: NetworkType;
+  CurrentServiceDomain: number;
+  RoamingStatus: RoamingStatus;
+  BatteryStatus: BatteryStatus;
+  BatteryLevel: string;
+  BatteryPercent: string;
+  simlockStatus: number;
+  WanIPAddress: string;
+  WanIPv6Address: string;
+  PrimaryDns: string;
+  SecondaryDns: string;
+  PrimaryIPv6Dns: string;
+  SecondaryIPv6Dns: string;
+  CurrentWifiUser: number;
+  TotalWifiUser: number;
+  currenttotalwifiuser: number;
+  ServiceStatus: ServiceStatus;
+  SimStatus: SimStatus;
+  WifiStatus: WifiStatus;
+  CurrentNetworkTypeEx: NetworkType;
+  maxsignal: number;
+  wifiindooronly: string;
+  wififrequence: string;
+  classify: string;
+  flymode: string;
+  cellroam: string;
+  voice_busy: string;
+}
 
-/**
-* @return {Promise<Status>}
-*/
-export async function getStatus() {
+export async function getStatus(): Promise<Status> {
   const data = await ajax.getAjaxData({
     url: 'api/monitoring/status',
   });

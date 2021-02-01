@@ -5,18 +5,17 @@ import shajs from 'sha.js';
 import promiseFinally from 'promise.prototype.finally';
 import * as commonUtils from '$env/utils';
 
+type PromiseFunction = (...args: any[]) => Promise<any>;
+
 /**
  * A promise based queue
  */
 export class Queue {
-  constructor() {
-    this.list = [];
-  }
+  list: Array<PromiseFunction> = [];
   /**
    * Runs a particular item in the queue
-   * @param {number} idx
    */
-  _runItem(idx) {
+  _runItem(idx: number) {
     promiseFinally(this.list[idx](), () => {
       this._onComplete();
     });
@@ -36,9 +35,9 @@ export class Queue {
   }
   /**
    * Adds a new promise to the queue
-   * @param {function} func A function which returns a promise
+   * @param func A function which returns a promise
    */
-  add(func) {
+  add(func: PromiseFunction) {
     this.list.push(func);
     if (this.list.length === 1) {
       this._runItem(0);
@@ -48,10 +47,8 @@ export class Queue {
 
 /**
  * Promise version of setTimeout
- * @param {number} t
- * @return {Promise}
  */
-export function delay(t) {
+export function delay(t: number): Promise<void> {
   return new Promise(function(resolve) {
     setTimeout(resolve, t);
   });
@@ -60,10 +57,8 @@ export function delay(t) {
 /**
  * Sends a request for the router's global config
  * to determine if there is a connection
- * @param {string} [routerUrl='']
- * @return {Promise}
  */
-export function ping(routerUrl='') {
+export function ping(routerUrl: string = ''): Promise<void> {
   let parsedUrl;
   if (routerUrl) {
     parsedUrl = commonUtils.parseRouterUrl(routerUrl);
@@ -73,7 +68,7 @@ export function ping(routerUrl='') {
   return ajax.ping(parsedUrl.origin);
 }
 
-export function sha256(str) {
+export function sha256(str: string): string {
   return shajs('sha256').update(str).digest('hex');
 }
 

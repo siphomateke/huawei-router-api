@@ -1,32 +1,30 @@
 'use strict';
-import {RouterError, throwApiError, RequestError} from '@/error';
+import { RouterError, throwApiError, RequestError, RequestErrorCode } from '@/error';
 import config from '@/config';
 import NodeRSA from 'node-rsa';
 import xml2js from 'xml2js';
-import axios from 'axios';
+import axios, { AxiosResponse, AxiosError } from 'axios';
 import axiosCookieJarSupport from 'axios-cookiejar-support';
-import {CookieJar} from 'tough-cookie';
+import { CookieJar } from 'tough-cookie';
 
 const jar = new CookieJar();
 
 axiosCookieJarSupport(axios);
 
-/**
- * @typedef requestOptions
- * @property {string} url
- * @property {string} [method]
- * @property {object} [data]
- * @property {Object.<string, string>} [headers]
- * @property {string} [accepts]
- * @property {string} [responseType]
- */
+export type RequestHeaders = {
+  [headerName: string]: string | undefined;
+};
 
-/**
- *
- * @param {requestOptions} options
- * @return {Promise<import('axios').AxiosResponse>}
- */
-export async function request(options) {
+interface RequestOptions {
+  url: string,
+  method?: string,
+  data?: any,
+  headers?: RequestHeaders,
+  accepts?: string,
+  responseType?: string,
+}
+
+export async function request<T extends any>(options: RequestOptions): Promise<AxiosResponse<T>> {
   options = Object.assign({
     method: 'GET',
   }, options);
@@ -48,22 +46,22 @@ export async function request(options) {
     });
     return response;
   } catch (error) {
-    let requestErrorCode = '';
-    let requestErrorMessage = '';
+    let requestErrorCode: RequestErrorCode;
+    let requestErrorMessage: string;
     if (error.response) {
       if (error.response.status === 408 || error.code === 'ECONNABORTED') {
         requestErrorCode = 'timeout';
         requestErrorMessage = 'HTTP request timed out.';
       } else {
         requestErrorCode = 'invalid_status';
-        requestErrorMessage = 'HTTP request response status invalid; '+error.response.status;
+        requestErrorMessage = 'HTTP request response status invalid; ' + error.response.status;
       }
     } else if (error.request) {
       requestErrorCode = 'no_response';
       requestErrorMessage = 'HTTP request was made but no response was received.';
     } else {
       requestErrorCode = 'error';
-      requestErrorMessage = 'Unknown HTTP request error; '+error.message;
+      requestErrorMessage = 'Unknown HTTP request error; ' + error.message;
     }
     let axiosErrorCode = '';
     if (error.code) {
@@ -73,29 +71,21 @@ export async function request(options) {
   }
 }
 
-export async function basicRequest(url) {
-  const {data} = await request({url});
+export async function basicRequest(url: string) {
+  const { data } = await request({ url });
   return data;
 }
 
-/**
- * @typedef xmlRequestOptions
- * @property {string} url
- * @property {string} [method]
- * @property {object} [data]
- * @property {Object.<string, string>} [headers]
- */
+interface XmlRequestOptions extends RequestOptions { }
 
-const xmlParser = new xml2js.Parser({explicitArray: false});
+const xmlParser = new xml2js.Parser({ explicitArray: false });
 
 /**
  * Converts an XML string to JSON
- * @param {string} str
- * @returns {Promise<Object>}
  */
-async function parseXml(str) {
+async function parseXml(str: string): Promise<object> {
   return new Promise((resolve, reject) => {
-    xmlParser.parseString(str, (err, result) => {
+    xmlParser.parseString(str, (err: any, result: object | undefined) => {
       if (err) {
         reject(err);
       }
@@ -104,50 +94,54 @@ async function parseXml(str) {
   })
 }
 
-/**
- *
- * @param {xmlRequestOptions} options
- * @return {Promise<any>}
- */
-export async function xmlRequest(options) {
-  const response = await request({
+export async function xmlRequest(options: XmlRequestOptions): Promise<{ data: object, headers: any }> {
+  // FIXME: Fix this type
+  const response = await <string>request({
     accepts: 'application/xml',
     ...options,
   });
   try {
     const data = await parseXml(response.data);
-    return {data, headers: response.headers};
+    return { data, headers: response.headers };
   } catch (e) {
     throw new RequestError('invalid_xml', e);
   }
 }
 
+export type AjaxOkResponse = 'ok';
+
 /**
  * Checks if an ajax return is valid by checking if the response is 'ok'
- * @private
- * @param   {object}  ret The AJAX return
- * @return {boolean} if the response is ok
+ * @param ret The AJAX return
+ * @return if the response is ok
  */
-export function isAjaxReturnOk(ret) {
+export function isAjaxReturnOk(ret: AjaxOkResponse|any): boolean {
   return typeof ret === 'string' && ret.toLowerCase() === 'ok';
 }
 
+// FIXME: Fix this type
+interface XmlResponse {
+  error?: {
+    code: string,
+    message: string,
+  },
+  [key: string]: AjaxOkResponse | any,
+}
+
 /**
- *
- * @param {any} ret
- * @param {boolean} responseMustBeOk
- * @return {Promise<any>}
+ * @returns The processed XML response.
  */
-export async function processXmlResponse(ret, responseMustBeOk=false) {
+export async function processXmlResponse(ret: XmlResponse, responseMustBeOk: boolean = false): Promise<AjaxOkResponse|any> {
+  /** The name of the root XML element. */
   const root = Object.keys(ret)[0];
+  /** Children of the root XML element. */
   const rootValue = ret[root];
   if (root !== 'error') {
     if (responseMustBeOk) {
       if (isAjaxReturnOk(rootValue)) {
         return rootValue;
       } else {
-        throw new RouterError(
-          'xml_response_not_ok', ret);
+        throw new RouterError('xml_response_not_ok', ret);
       }
     } else {
       return rootValue;
@@ -157,7 +151,7 @@ export async function processXmlResponse(ret, responseMustBeOk=false) {
   }
 }
 
-export async function doRSAEncrypt(str) {
+export async function doRSAEncrypt(str: string): Promise<string> {
   if (str === '') {
     return '';
   }
@@ -171,14 +165,9 @@ export async function doRSAEncrypt(str) {
 }
 
 const xmlBuilder = new xml2js.Builder({
-  renderOpts: {pretty: false}
+  renderOpts: { pretty: false }
 });
 
-/**
- *
- * @param {object} obj
- * @return {string}
- */
-export function objectToXml(obj) {
+export function objectToXml(obj: object): string {
   return xmlBuilder.buildObject(obj);
 }

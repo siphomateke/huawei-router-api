@@ -75,7 +75,7 @@ external.push(...[
 
 function getConfig() {
   const config = {
-    input: 'src/index.js',
+    input: 'src/index.ts',
     plugins: [sourcemaps()],
     external,
   };
